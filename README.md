@@ -1,1 +1,52 @@
-# dormManager
+# 🏠 宿舍管理系统 DormManager
+
+一个基于 Spring Boot 的高校宿舍管理系统后端服务，支持学生宿舍调换、退宿、报修、公告管理、宿管/管理员登录等核心功能，适用于教务处或学生事务中心的宿舍管理流程数字化改造。
+
+---
+
+## 🧩 功能模块
+
+- 🎓 **学生管理**：学生信息的增删改查
+- 🛏 **宿舍房间管理**：宿舍楼与房间信息管理、床位分配
+- 🔄 **调宿申请**：学生申请调换宿舍流程及审批
+- 📤 **退宿申请**：学生发起退宿，管理员审核
+- 🛠 **宿舍报修**：宿舍设施报修提交、处理、状态跟踪
+- 📢 **公告通知**：公告发布与查询
+- 👮 **宿管/管理员管理**：宿管账号信息管理与系统权限控制
+- 🧾 **访客管理**：来访登记与审批（可选）
+
+---
+
+## 🛠 技术栈
+
+- **后端框架**：Spring Boot 2.x
+- **ORM 框架**：MyBatis-Plus
+- **数据库**：MySQL 8.x
+- **接口文档**：Swagger 或 Postman/Insomnia（手动测试）
+- **依赖管理**：Maven
+- **工具类**：Lombok、PageHelper、FastJSON（视实际情况而定）
+
+---
+
+## 🖥️ 环境配置
+
+### ✅ 软件要求
+
+- JDK 1.8+
+- Maven 3.6+
+- MySQL 8.0+
+- IDE：IntelliJ IDEA / VS Code
+
+### ✅ 数据库初始化
+
+1. 创建数据库 `dorm_manager`
+2. 执行项目提供的 SQL 文件，初始化表结构与部分数据
+3. 修改配置文件中的数据库连接信息：
+
+```yaml
+# application.yml 示例
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/dorm_manager?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: your_password
