@@ -1,0 +1,20 @@
+package com.example.springboot.service;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.springboot.entity.QuitRoom;
+
+public interface QuitRoomService extends IService<QuitRoom> {
+
+    // 查询退宿申请
+    Page find(Integer pageNum, Integer pageSize, String search);
+
+    // 删除退宿申请
+    int deleteQuit(Integer id);
+
+    // 更新退宿申请
+    int updateQuit(QuitRoom quitRoom);
+
+    // 添加退宿申请
+    int addQuit(QuitRoom quitRoom);
+}
