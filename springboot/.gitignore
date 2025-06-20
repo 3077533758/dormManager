@@ -1,0 +1,57 @@
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+### Gradle ###
+.gradle/
+build/
+!gradle-wrapper.jar
+.gradle-cache/
+**/out/
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+out/
+.idea_modules/
+*.ipr
+
+### Eclipse ###
+.project
+.classpath
+.csettings/
+.settings/
+bin/
+
+### VS Code ###
+.vscode/
+
+### OS Files ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+logs/
+*.log
+
+### Spring Boot specific ###
+spring.log
+
+### Other ###
+.env
+*.swp
+*.bak
+*.tmp
