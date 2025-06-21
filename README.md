@@ -39,14 +39,8 @@
 
 ### ✅ 数据库初始化
 
-1. 创建数据库 `dorm_manager`
+1. 创建数据库 `db1`
 2. 执行项目提供的 SQL 文件，初始化表结构与部分数据
 3. 修改配置文件中的数据库连接信息：
 
-```yaml
-# application.yml 示例
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/dorm_manager?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8
-    username: root
-    password: your_password
+
