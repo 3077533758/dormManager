@@ -2,6 +2,7 @@ package com.example.springboot.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboot.common.Result;
+import com.example.springboot.entity.DormRoom;
 import com.example.springboot.entity.QuitRoom;
 import com.example.springboot.service.DormRoomService;
 import com.example.springboot.service.QuitRoomService;
@@ -27,6 +28,12 @@ public class QuitRoomController {
      */
     @PostMapping("/add")
     public Result<?> add(@RequestBody QuitRoom quitRoom) {
+        // 检查学生是否有宿舍
+        DormRoom dormRoom = dormRoomService.judgeHadBed(quitRoom.getUsername());
+        if (dormRoom == null) {
+            return Result.error("-1", "您当前没有宿舍，无法申请退宿");
+        }
+        
         // 自动生成申请时间
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

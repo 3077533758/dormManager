@@ -14,6 +14,7 @@ export default {
             detailDialog: false,
             tableData: [],
             form: {},
+            hasRoom: true,
             rules: {
                 reason: [
                     {required: true, message: '请输入外宿原因', trigger: 'blur'}
@@ -28,9 +29,32 @@ export default {
         }
     },
     created() {
+        this.checkRoomStatus()
         this.load()
     },
     methods: {
+        checkRoomStatus() {
+            const username = JSON.parse(sessionStorage.getItem("user")).username
+            request.get("/main/getStudentRoomStatus/" + username).then((res) => {
+                if (res.code === "0") {
+                    this.hasRoom = true
+                } else {
+                    this.hasRoom = false
+                    ElMessage({
+                        message: "您当前没有宿舍。如需帮助请联系宿管。",
+                        type: "warning",
+                        duration: 5000
+                    })
+                }
+            }).catch(() => {
+                this.hasRoom = false
+                ElMessage({
+                    message: "您当前没有宿舍。如需帮助请联系宿管。",
+                    type: "warning",
+                    duration: 5000
+                })
+            })
+        },
         load() {
             this.loading = true
             const username = JSON.parse(sessionStorage.getItem("user")).username
@@ -46,6 +70,14 @@ export default {
             })
         },
         add() {
+            if (!this.hasRoom) {
+                ElMessage({
+                    message: "您当前没有宿舍。如需帮助请联系宿管。",
+                    type: "warning"
+                })
+                return
+            }
+            
             this.dialogVisible = true
             this.$nextTick(() => {
                 this.$refs.form.resetFields()

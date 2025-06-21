@@ -149,7 +149,7 @@ public class DormRoomController {
         if (dormRoom != null) {
             return Result.success(dormRoom);
         } else {
-            return Result.error("-1", "不存在该生");
+            return Result.error("-1", "未查询到该生宿舍信息");
         }
     }
 
@@ -188,7 +188,7 @@ public class DormRoomController {
         if (dormRoom != null) {
             return Result.success(dormRoom);
         } else {
-            return Result.error("-1", "不存在该房间");
+            return Result.error("-1", "未查询到该房间");
         }
     }
 }

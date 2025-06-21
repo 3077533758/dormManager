@@ -2,7 +2,9 @@ package com.example.springboot.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboot.common.Result;
+import com.example.springboot.entity.DormRoom;
 import com.example.springboot.entity.OutLive;
+import com.example.springboot.service.DormRoomService;
 import com.example.springboot.service.OutLiveService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +19,20 @@ public class OutLiveController {
     @Resource
     private OutLiveService outLiveService;
 
+    @Resource
+    private DormRoomService dormRoomService;
+
     /**
      * 添加外宿申请
      */
     @PostMapping("/add")
     public Result<?> add(@RequestBody OutLive outLive) {
+        // 检查学生是否有宿舍
+        DormRoom dormRoom = dormRoomService.judgeHadBed(outLive.getUsername());
+        if (dormRoom == null) {
+            return Result.error("-1", "您当前没有宿舍，无法申请外宿");
+        }
+        
         // 自动生成申请时间
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
