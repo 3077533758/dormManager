@@ -38,4 +38,13 @@ public class OutLiveServiceImpl extends ServiceImpl<OutLiveMapper, OutLive> impl
         qw.like("username", search).or().like("name", search);
         return outLiveMapper.selectPage(page, qw);
     }
+
+    @Override
+    public Page findByUsername(String username, Integer pageNum, Integer pageSize) {
+        Page<OutLive> page = new Page<>(pageNum, pageSize);
+        QueryWrapper<OutLive> qw = new QueryWrapper<>();
+        qw.eq("username", username);
+        qw.orderByDesc("apply_time");
+        return outLiveMapper.selectPage(page, qw);
+    }
 }

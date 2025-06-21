@@ -9,6 +9,8 @@ import com.example.springboot.common.JudgeBedName;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/quitRoom")
@@ -25,15 +27,26 @@ public class QuitRoomController {
      */
     @PostMapping("/add")
     public Result<?> add(@RequestBody QuitRoom quitRoom) {
+        // 自动生成申请时间
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        quitRoom.setApplyTime(now.format(formatter));
+        quitRoom.setState("未处理");
+        
         int result = quitRoomService.addQuit(quitRoom);
         return result == 1 ? Result.success() : Result.error("-1", "添加失败");
     }
 
     /**
-     * 更新退宿申请（state为true代表“通过”）
+     * 更新退宿申请（state为true代表"通过"）
      */
     @PutMapping("/update/{state}")
     public Result<?> update(@RequestBody QuitRoom quitRoom, @PathVariable Boolean state) {
+        // 自动生成处理时间
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        quitRoom.setFinishTime(now.format(formatter));
+        
         if (state) {
             String bedField = JudgeBedName.getBedName(quitRoom.getBedNumber());
             int updateResult = dormRoomService.deleteBedInfo(
@@ -68,6 +81,17 @@ public class QuitRoomController {
                               @RequestParam(defaultValue = "10") Integer pageSize,
                               @RequestParam(defaultValue = "") String search) {
         Page page = quitRoomService.find(pageNum, pageSize, search);
+        return page != null ? Result.success(page) : Result.error("-1", "查询失败");
+    }
+
+    /**
+     * 根据用户名查询退宿申请（学生端使用）
+     */
+    @GetMapping("/findByUsername/{username}")
+    public Result<?> findByUsername(@PathVariable String username,
+                                   @RequestParam(defaultValue = "1") Integer pageNum,
+                                   @RequestParam(defaultValue = "10") Integer pageSize) {
+        Page page = quitRoomService.findByUsername(username, pageNum, pageSize);
         return page != null ? Result.success(page) : Result.error("-1", "查询失败");
     }
 }

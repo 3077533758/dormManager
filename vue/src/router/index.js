@@ -14,12 +14,16 @@ export const constantRoutes = [
             {path: '/roomInfo', name: 'RoomInfo', component: () => import("@/views/RoomInfo")},
             {path: '/noticeInfo', name: 'NoticeInfo', component: () => import("@/views/NoticeInfo")},
             {path: '/adjustRoomInfo', name: 'AdjustRoomInfo', component: () => import("@/views/AdjustRoomInfo")},
+            {path: '/quitRoomInfo', name: 'QuitRoomInfo', component: () => import("@/views/QuitRoomInfo")},
+            {path: '/outLiveInfo', name: 'OutLiveInfo', component: () => import("@/views/OutLiveInfo")},
             {path: '/repairInfo', name: 'RepairInfo', component: () => import("@/views/RepairInfo")},
             {path: '/visitorInfo', name: 'VisitorInfo', component: () => import("@/views/VisitorInfo")},
             //
             {path: '/myRoomInfo', name: 'MyRoomInfo', component: () => import("@/views/MyRoomInfo")},
             {path: '/applyRepairInfo', name: 'ApplyRepairInfo', component: () => import("@/views/ApplyRepairInfo")},
             {path: '/applyChangeRoom', name: 'ApplyChangeRoom', component: () => import("@/views/ApplyChangeRoom")},
+            {path: '/applyQuitRoom', name: 'ApplyQuitRoom', component: () => import("@/views/ApplyQuitRoom")},
+            {path: '/applyOutLive', name: 'ApplyOutLive', component: () => import("@/views/ApplyOutLive")},
 
             {path: '/selfInfo', name: 'SelfInfo', component: () => import("@/views/SelfInfo")},
         ]
