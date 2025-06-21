@@ -48,6 +48,8 @@
         <span>申请管理</span>
       </template>
       <el-menu-item v-if="this.judgeIdentity() !== 0" index="/adjustRoomInfo">调宿申请</el-menu-item>
+      <el-menu-item v-if="this.judgeIdentity() !== 0" index="/quitRoomInfo">退宿申请</el-menu-item>
+      <el-menu-item v-if="this.judgeIdentity() !== 0" index="/outLiveInfo">外宿申请</el-menu-item>
     </el-sub-menu>
     <el-menu-item v-if="this.judgeIdentity() !== 0" index="/visitorInfo">
       <svg class="icon" data-v-042ca774="" style="height: 18px; margin-right: 11px;" viewBox="0 0 1024 1024"
@@ -69,6 +71,18 @@
         <takeaway-box />
       </el-icon>
       <span>申请调宿</span>
+    </el-menu-item>
+    <el-menu-item v-if="this.judgeIdentity() === 0" index="/applyQuitRoom">
+      <el-icon>
+        <house />
+      </el-icon>
+      <span>申请退宿</span>
+    </el-menu-item>
+    <el-menu-item v-if="this.judgeIdentity() === 0" index="/applyOutLive">
+      <el-icon>
+        <location />
+      </el-icon>
+      <span>申请外宿</span>
     </el-menu-item>
     <el-menu-item v-if="this.judgeIdentity() === 0" index="/applyRepairInfo">
       <el-icon>
