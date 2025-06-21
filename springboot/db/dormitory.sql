@@ -2,6 +2,39 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
+-- Table structure for out_live
+-- ----------------------------
+DROP TABLE IF EXISTS `out_live`;
+CREATE TABLE `out_live` (
+                            `id` INT NOT NULL AUTO_INCREMENT COMMENT '主键',
+                            `username` VARCHAR(255) NOT NULL COMMENT '学号',
+                            `name` VARCHAR(255) NOT NULL COMMENT '学生姓名',
+                            `reason` VARCHAR(255) NOT NULL COMMENT '外出住宿原因',
+                            `start_date` DATE NOT NULL COMMENT '开始日期',
+                            `end_date` DATE NOT NULL COMMENT '结束日期',
+                            `state` ENUM('未处理', '通过', '驳回') DEFAULT '未处理' COMMENT '审批状态',
+                            `apply_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '申请时间',
+                            `finish_time` DATETIME DEFAULT NULL COMMENT '处理时间',
+                            PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='学生外出住宿申请表';
+-- ----------------------------
+-- Records of out_live
+-- ----------------------------
+INSERT INTO `out_live` (`username`, `name`, `reason`, `start_date`, `end_date`, `state`, `apply_time`, `finish_time`)
+VALUES ('stu1', '张三', '家庭距离较近，选择回家居住', '2025-07-01', '2025-08-31', '通过', '2025-06-10 09:00:00', '2025-06-12 08:00:00');
+
+INSERT INTO `out_live` (`username`, `name`, `reason`, `start_date`, `end_date`, `state`, `apply_time`, `finish_time`)
+VALUES ('stu6', '泡泡', '学校宿舍太吵，需安静环境', '2025-07-05', '2025-09-01', '未处理', '2025-06-15 15:20:00', NULL);
+
+INSERT INTO `out_live` (`username`, `name`, `reason`, `start_date`, `end_date`, `state`, `apply_time`, `finish_time`)
+VALUES ('stu11', '巧巧', '亲属照顾方便，申请外宿', '2025-07-10', '2025-08-15', '驳回', '2025-06-18 13:40:00', '2025-06-20 10:00:00');
+
+
+
+
+
+
+-- ----------------------------
 -- Table structure for quit_room
 -- ----------------------------
 DROP TABLE IF EXISTS `quit_room`;
