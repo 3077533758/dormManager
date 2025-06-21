@@ -149,7 +149,7 @@ public class DormRoomController {
         if (dormRoom != null) {
             return Result.success(dormRoom);
         } else {
-            return Result.error("-1", "未查询到该生宿舍信息");
+            return Result.error("-1", "信息不存在，请联系管理员。");
         }
     }
 
