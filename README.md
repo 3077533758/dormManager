@@ -24,7 +24,7 @@
 
 - **后端框架**：Spring Boot 2.6.3  
 - **数据库操作**：MyBatis-Plus  
-- **数据库**：MySQL 8.x  
+- **数据库**：MySQL 
 - **依赖管理**：Maven  
 - **工具库**：Lombok、PageHelper、FastJSON（如有使用）  
 - **接口测试**：Swagger（如集成）、Postman、Insomnia  
@@ -35,9 +35,9 @@
 
 ### ✅ 软件要求
 
-- JDK 1.8+  
-- Maven 3.6+  
-- MySQL 8.0+  
+- JDK 1.8
+- Maven 3.9.9
+- MySQL 8.4.5  
 - Node.js 14.21.3
 - IDE 推荐：IntelliJ IDEA / VS Code  
 
