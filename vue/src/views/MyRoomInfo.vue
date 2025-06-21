@@ -5,7 +5,23 @@
       <el-breadcrumb-item>我的宿舍</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card style="margin: 15px; min-height: calc(100vh - 111px)">
-      <div style="display: flex">
+      <!-- 没有宿舍时的提示 -->
+      <div v-if="!hasRoom" style="text-align: center; padding: 50px;">
+        <el-empty description="您当前没有宿舍">
+          <el-icon style="font-size: 60px; color: #909399; margin-bottom: 20px;">
+            <house />
+          </el-icon>
+          <p style="color: #909399; font-size: 16px; margin: 20px 0;">
+            如需帮助请联系宿管
+          </p>
+          <el-button type="primary" @click="checkRoomStatus">
+            刷新状态
+          </el-button>
+        </el-empty>
+      </div>
+      
+      <!-- 有宿舍时显示宿舍信息 -->
+      <div v-else style="display: flex">
         <div style="margin-top: 55px">
           <div style="margin-left: 50px;margin-top: 20px">
             <!--      房间信息-->
@@ -68,13 +84,13 @@
             </el-descriptions>
           </div>
           <!--      床位信息-->
-          <div style="margin-left: 50px;margin-top: 40px">
+          <div style="margin-left: 50px;margin-top: 20px">
             <el-descriptions :column="1" border style="width: 500px" title="床位信息">
               <el-descriptions-item>
                 <template #label>
                   <div>
                     <el-icon>
-                      <user/>
+                      <office-building/>
                     </el-icon>
                     一号床位
                   </div>
@@ -90,7 +106,7 @@
                 <template #label>
                   <div>
                     <el-icon>
-                      <location/>
+                      <office-building/>
                     </el-icon>
                     二号床位
                   </div>
@@ -106,7 +122,7 @@
                 <template #label>
                   <div>
                     <el-icon>
-                      <tickets/>
+                      <office-building/>
                     </el-icon>
                     三号床位
                   </div>

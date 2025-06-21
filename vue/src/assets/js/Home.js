@@ -2,6 +2,7 @@ import weather from "@/components/weather";
 import Calender from "@/components/Calendar";
 import request from "@/utils/request";
 import home_echarts from "@/components/home_echarts";
+import { ElMessage } from "element-plus";
 
 export default {
     name: "Home",
@@ -17,9 +18,12 @@ export default {
             repairOrderNum: "",
             noFullRoomNum: "",
             activities: [],
+            hasRoom: true,
+            isStudent: false,
         };
     },
     created() {
+        this.checkUserStatus();
         this.getHomePageNotice();
         this.getStuNum();
         this.getHaveRoomNum();
@@ -27,6 +31,42 @@ export default {
         this.getNoFullRoom();
     },
     methods: {
+        checkUserStatus() {
+            const user = JSON.parse(sessionStorage.getItem("user"));
+            const identity = JSON.parse(sessionStorage.getItem("identity"));
+            
+            if (identity === 'stu') {
+                this.isStudent = true;
+                this.checkRoomStatus(user.username);
+            }
+        },
+        checkRoomStatus(username) {
+            request.get("/main/getStudentRoomStatus/" + username).then((res) => {
+                if (res.code === "0") {
+                    this.hasRoom = true;
+                } else {
+                    this.hasRoom = false;
+                    ElMessage({
+                        message: "您当前没有宿舍。如需帮助请联系宿管。",
+                        type: "warning",
+                        duration: 5000
+                    });
+                }
+            }).catch(() => {
+                this.hasRoom = false;
+                ElMessage({
+                    message: "您当前没有宿舍。如需帮助请联系宿管。",
+                    type: "warning",
+                    duration: 5000
+                });
+            });
+        },
+        refreshRoomStatus() {
+            const user = JSON.parse(sessionStorage.getItem("user"));
+            if (user && user.username) {
+                this.checkRoomStatus(user.username);
+            }
+        },
         async getStuNum() {
             request.get("/stu/stuNum").then((res) => {
                 if (res.code === "0") {

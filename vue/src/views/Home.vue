@@ -1,5 +1,25 @@
 <template>
   <el-card style="margin: 15px; min-height: calc(100vh - 80px)">
+    <!-- 学生没有宿舍时的提示 -->
+    <div v-if="isStudent && !hasRoom" style="margin-bottom: 20px;">
+      <el-alert
+        title="宿舍状态提醒"
+        description="您当前没有宿舍。如需帮助请联系宿管。"
+        type="warning"
+        :closable="false"
+        show-icon
+      >
+        <template #default>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span>您当前没有宿舍。如需帮助请联系宿管。</span>
+            <el-button type="primary" size="small" @click="refreshRoomStatus">
+              刷新状态
+            </el-button>
+          </div>
+        </template>
+      </el-alert>
+    </div>
+    
     <!--    头部数据-->
     <div>
       <el-row :gutter="20" class="topInfo">

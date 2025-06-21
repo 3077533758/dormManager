@@ -109,7 +109,8 @@ export default {
     return {
       user: {},
       identity: '',
-      path: this.$route.path
+      path: this.$route.path,
+      hasRoom: true // 默认有宿舍
     }
   },
   created() {
@@ -142,7 +143,24 @@ export default {
         }
         window.sessionStorage.setItem("user", JSON.stringify(result.data));
         this.user = result.data
+        
+        // 如果是学生，检查宿舍状态
+        if (this.identity === 'stu') {
+          this.checkRoomStatus()
+        }
       });
+    },
+    checkRoomStatus() {
+      const username = this.user.username
+      request.get("/main/getStudentRoomStatus/" + username).then((res) => {
+        if (res.code === "0") {
+          this.hasRoom = true
+        } else {
+          this.hasRoom = false
+        }
+      }).catch(() => {
+        this.hasRoom = false
+      })
     },
     judgeIdentity() {
       if (this.identity === 'stu') {
@@ -152,10 +170,6 @@ export default {
       } else
         return 2
     },
-
-
-
-
   },
   computed: {
     logo() {

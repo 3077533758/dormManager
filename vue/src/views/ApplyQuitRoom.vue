@@ -2,144 +2,139 @@
   <div>
     <el-breadcrumb separator-icon="ArrowRight" style="margin: 16px">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>申请管理</el-breadcrumb-item>
-      <el-breadcrumb-item>退宿申请</el-breadcrumb-item>
+      <el-breadcrumb-item>申请退宿</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card style="margin: 15px; min-height: calc(100vh - 111px)">
-      <div>
-        <!--    功能区-->
-        <div style="margin: 10px 0">
-          <div style="float: right">
-            <el-tooltip content="添加" placement="top">
-              <el-button icon="plus" style="width: 50px" type="primary" @click="add"></el-button>
-            </el-tooltip>
-          </div>
-        </div>
-        <!--    表格-->
-        <el-table v-loading="loading" :data="tableData" border max-height="705" style="width: 100%">
-          <el-table-column label="#" type="index"/>
-          <el-table-column label="学号" prop="username" sortable width="100px"/>
-          <el-table-column label="姓名" prop="name" width="100px"/>
-          <el-table-column label="宿舍号" prop="dormRoomId" sortable/>
-          <el-table-column label="床位号" prop="bedNumber" sortable/>
-          <el-table-column label="退宿原因" prop="reason" width="200px"/>
-          <el-table-column
-              :filter-method="filterTag"
-              :filters="[
-              { text: '未处理', value: '未处理' },
-              { text: '通过', value: '通过' },
-              { text: '驳回', value: '驳回' },
-            ]"
-              filter-placement="bottom-end"
-              label="申请状态"
-              prop="state"
-              sortable
-              width="130px"
-          >
-            <template #default="scope">
-              <el-tag :type="scope.row.state === '通过' ? 'success' : (scope.row.state === '驳回' ? 'danger' : 'info')"
-                      disable-transitions
-              >{{ scope.row.state }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="申请时间" prop="applyTime" sortable/>
-          <el-table-column label="处理时间" prop="finishTime" sortable/>
-          <!--      操作栏-->
-          <el-table-column label="操作" width="130px">
-            <template #default="scope">
-              <el-button icon="more-filled" type="default" @click="showDetail(scope.row)"></el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <!--分页-->
-        <div style="margin: 10px 0">
-          <el-pagination
-              v-model:currentPage="currentPage"
-              :page-size="pageSize"
-              :page-sizes="[10, 20]"
-              :total="total"
-              layout="total, sizes, prev, pager, next, jumper"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-          >
-          </el-pagination>
-        </div>
-        <div>
-          <!--      弹窗-->
-          <el-dialog v-model="dialogVisible" title="申请退宿" width="30%" @close="cancel">
-            <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-              <el-form-item label="学号" prop="username">
-                <el-input v-model="form.username" disabled style="width: 80%"></el-input>
-              </el-form-item>
-              <el-form-item label="姓名" prop="name">
-                <el-input v-model="form.name" disabled style="width: 80%"></el-input>
-              </el-form-item>
-              <el-form-item label="宿舍号" prop="dormRoomId">
-                <el-input v-model="form.dormRoomId" disabled style="width: 80%"></el-input>
-              </el-form-item>
-              <el-form-item label="床位号" prop="bedNumber">
-                <el-input v-model="form.bedNumber" disabled style="width: 80%"></el-input>
-              </el-form-item>
-              <el-form-item label="退宿原因" prop="reason">
-                <el-input type="textarea" v-model="form.reason" placeholder="请输入退宿原因" style="width: 80%" :rows="3"></el-input>
-              </el-form-item>
-            </el-form>
-            <template #footer>
-              <span class="dialog-footer">
-                <el-button @click="cancel">取 消</el-button>
-                <el-button type="primary" @click="save">确 定</el-button>
-              </span>
-            </template>
-          </el-dialog>
-          <!--详情信息弹窗-->
-          <el-dialog v-model="detailDialog" title="申请详情" width="30%" @close="cancel">
-            <el-form ref="form" :model="form" label-width="120px">
-              <el-form-item label="学号：" prop="username">
-                <template #default="scope">
-                  <span>{{ form.username }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="姓名：" prop="name">
-                <template #default="scope">
-                  <span>{{ form.name }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="宿舍号：" prop="dormRoomId">
-                <template #default="scope">
-                  <span>{{ form.dormRoomId }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="床位号：" prop="bedNumber">
-                <template #default="scope">
-                  <span>{{ form.bedNumber }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="退宿原因：" prop="reason">
-                <template #default="scope">
-                  <span>{{ form.reason }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="申请时间：" prop="applyTime">
-                <template #default="scope">
-                  <span>{{ form.applyTime }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="申请状态：" prop="state">
-                <template #default="scope">
-                  <span>{{ form.state }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="处理时间：" prop="finishTime">
-                <template #default="scope">
-                  <span>{{ form.finishTime || '暂无' }}</span>
-                </template>
-              </el-form-item>
-            </el-form>
-          </el-dialog>
-        </div>
+      <!-- 没有宿舍时的提示 -->
+      <div v-if="!hasRoom" style="margin-bottom: 20px;">
+        <el-alert
+          title="宿舍状态提醒"
+          description="您当前没有宿舍。如需帮助请联系宿管。"
+          type="warning"
+          :closable="false"
+          show-icon
+        />
+      </div>
+      
+      <div class="table-toolbar">
+        <h3 class="table-title">退宿申请记录</h3>
+        <el-button v-if="hasRoom" type="primary" @click="add" icon="Plus">申请退宿</el-button>
+      </div>
+
+      <el-table :data="tableData" stripe border :header-cell-class-name="'headerBg'"
+                @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column prop="id" label="ID" width="80"></el-table-column>
+        <el-table-column prop="username" label="用户名"></el-table-column>
+        <el-table-column prop="name" label="姓名"></el-table-column>
+        <el-table-column prop="dormRoomId" label="宿舍号"></el-table-column>
+        <el-table-column prop="bedNumber" label="床位号"></el-table-column>
+        <el-table-column prop="reason" label="退宿原因"></el-table-column>
+        <el-table-column prop="state" label="状态">
+          <template #default="scope">
+            <el-tag :type="scope.row.state === '通过' ? 'success' : scope.row.state === '驳回' ? 'danger' : 'warning'">
+              {{ scope.row.state }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="applyTime" label="申请时间"></el-table-column>
+        <el-table-column prop="finishTime" label="处理时间"></el-table-column>
+        <el-table-column label="操作" width="200" align="center">
+          <template #default="scope">
+            <el-button type="success" @click="showDetail(scope.row)">查看详情</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div style="padding: 10px 0">
+        <el-pagination
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="total">
+        </el-pagination>
       </div>
     </el-card>
+
+    <!-- 新增对话框 -->
+    <el-dialog v-model="dialogVisible" title="申请退宿" width="30%">
+      <el-form label-width="80px" size="small" :model="form" :rules="rules" ref="form">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="form.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="form.name" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="宿舍号" prop="dormRoomId">
+          <el-input v-model="form.dormRoomId" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="床位号" prop="bedNumber">
+          <el-input v-model="form.bedNumber" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="退宿原因" prop="reason">
+          <el-input type="textarea" v-model="form.reason" placeholder="请输入退宿原因"></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancel">取 消</el-button>
+          <el-button type="primary" @click="save">确 定</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 详情对话框 -->
+    <el-dialog v-model="detailDialog" title="申请详情" width="30%">
+      <el-form label-width="80px" size="small" :model="form">
+        <el-form-item label="用户名">
+          <el-input v-model="form.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="姓名">
+          <el-input v-model="form.name" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="宿舍号">
+          <el-input v-model="form.dormRoomId" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="床位号">
+          <el-input v-model="form.bedNumber" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="退宿原因">
+          <el-input type="textarea" v-model="form.reason" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-tag :type="form.state === '通过' ? 'success' : form.state === '驳回' ? 'danger' : 'warning'">
+            {{ form.state }}
+          </el-tag>
+        </el-form-item>
+        <el-form-item label="申请时间">
+          <el-input v-model="form.applyTime" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="处理时间">
+          <el-input v-model="form.finishTime" disabled></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancel">关 闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
-<script src="@/assets/js/ApplyQuitRoom.js"></script> 
+<script src="@/assets/js/ApplyQuitRoom.js"></script>
+<style scoped>
+.headerBg {
+  background: #eee !important;
+}
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.table-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+</style> 
