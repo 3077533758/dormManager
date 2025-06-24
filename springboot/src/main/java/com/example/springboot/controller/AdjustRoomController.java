@@ -3,7 +3,6 @@ package com.example.springboot.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboot.common.Result;
 import com.example.springboot.entity.AdjustRoom;
-import com.example.springboot.entity.DormRoom;
 import com.example.springboot.service.AdjustRoomService;
 import com.example.springboot.service.DormRoomService;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +26,6 @@ public class AdjustRoomController {
      */
     @PostMapping("/add")
     public Result<?> add(@RequestBody AdjustRoom adjustRoom) {
-        // 检查学生是否有宿舍
-        DormRoom dormRoom = dormRoomService.judgeHadBed(adjustRoom.getUsername());
-        if (dormRoom == null) {
-            return Result.error("-1", "您当前没有宿舍，无法申请调宿");
-        }
 
         int result = adjustRoomService.addApply(adjustRoom);
         if (result == 1) {
@@ -90,16 +84,5 @@ public class AdjustRoomController {
         } else {
             return Result.error("-1", "查询失败");
         }
-    }
-
-    /**
-     * 根据用户名查询调宿申请（学生端使用）
-     */
-    @GetMapping("/findByUsername/{username}")
-    public Result<?> findByUsername(@PathVariable String username,
-                                   @RequestParam(defaultValue = "1") Integer pageNum,
-                                   @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page page = adjustRoomService.findByUsername(username, pageNum, pageSize);
-        return page != null ? Result.success(page) : Result.error("-1", "查询失败");
     }
 }

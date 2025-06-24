@@ -9,9 +9,6 @@ public interface QuitRoomService extends IService<QuitRoom> {
     // 查询退宿申请
     Page find(Integer pageNum, Integer pageSize, String search);
 
-    // 根据用户名查询退宿申请
-    Page findByUsername(String username, Integer pageNum, Integer pageSize);
-
     // 删除退宿申请
     int deleteQuit(Integer id);
 

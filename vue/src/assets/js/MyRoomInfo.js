@@ -7,7 +7,6 @@ export default {
     data() {
         return {
             name: "",
-            hasRoom: true,
             form: {
                 username: "",
             },
@@ -26,39 +25,14 @@ export default {
     },
     created() {
         this.init();
-        this.checkRoomStatus();
+        this.getInfo();
     },
     methods: {
         init() {
             this.form = JSON.parse(sessionStorage.getItem("user"));
             this.name = this.form.username;
         },
-        checkRoomStatus() {
-            request.get("/main/getStudentRoomStatus/" + this.name).then((res) => {
-                if (res.code === "0") {
-                    this.hasRoom = true;
-                    this.getInfo();
-                } else {
-                    this.hasRoom = false;
-                    ElMessage({
-                        message: "您当前没有宿舍。如需帮助请联系宿管。",
-                        type: "warning",
-                        duration: 5000
-                    });
-                }
-            }).catch(() => {
-                this.hasRoom = false;
-                ElMessage({
-                    message: "您当前没有宿舍。如需帮助请联系宿管。",
-                    type: "warning",
-                    duration: 5000
-                });
-            });
-        },
         getInfo() {
-            if (!this.hasRoom) {
-                return;
-            }
             request.get("/room/getMyRoom/" + this.name).then((res) => {
                 if (res.code === "0") {
                     this.room = res.data;
