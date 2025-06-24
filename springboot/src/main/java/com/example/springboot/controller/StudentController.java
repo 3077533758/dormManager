@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboot.common.Result;
 import com.example.springboot.entity.Student;
 import com.example.springboot.entity.User;
+import com.example.springboot.service.AdjustRoomService;
+import com.example.springboot.service.QuitRoomService;
 import com.example.springboot.service.StudentService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,10 @@ public class StudentController {
 
     @Resource
     private StudentService studentService;
+    @Resource
+    private AdjustRoomService adjustRoomService;
+    @Resource
+    private QuitRoomService quitRoomService;
 
     /**
      * 添加学生信息
@@ -117,5 +123,18 @@ public class StudentController {
         } else {
             return Result.error("-1", "未查询到该生信息");
         }
+    }
+
+    /**
+     * 查询学生调宿/退宿申请状态
+     */
+    @GetMapping("/apply-status/{username}")
+    public Result<?> getStudentApplyStatus(@PathVariable String username) {
+        boolean hasPendingAdjust = adjustRoomService.hasPendingAdjust(username);
+        boolean hasPendingQuit = quitRoomService.hasPendingQuit(username);
+        java.util.Map<String, Boolean> result = new java.util.HashMap<>();
+        result.put("hasPendingAdjust", hasPendingAdjust);
+        result.put("hasPendingQuit", hasPendingQuit);
+        return Result.success(result);
     }
 }
