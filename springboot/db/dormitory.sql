@@ -58,7 +58,8 @@ CREATE TABLE `dorm_build`  (
   `compound_id` int(0) NOT NULL COMMENT '所属园区ID',
   `campus` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '园区',
   `id` int(0) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  PRIMARY KEY (`id`) USING BTREE
+  PRIMARY KEY (`id`) USING BTREE，
+  UNIQUE KEY `unique_dormbuild_id` (`dormbuild_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 -- ----------------------------
 -- Table structure for student
