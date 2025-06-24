@@ -55,3 +55,7 @@ spring.log
 *.swp
 *.bak
 *.tmp
+
+# 忽略密钥文件
+sangsang_key
+sangsang_key.pub

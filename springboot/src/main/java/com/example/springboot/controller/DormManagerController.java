@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @RestController
 @RequestMapping("/dormManager")
@@ -86,6 +87,71 @@ public class DormManagerController {
             return Result.success(o);
         } else {
             return Result.error("-1", "用户名或密码错误");
+        }
+    }
+
+    // 分页查询宿管信息（包含管辖区域信息）
+    @GetMapping("/page")
+    public Result<Page<DormManager>> findPageWithArea(@RequestParam(defaultValue = "1") Integer pageNum,
+                                              @RequestParam(defaultValue = "10") Integer pageSize,
+                                              @RequestParam(defaultValue = "") String search) {
+        Page<DormManager> page = new Page<>(pageNum, pageSize);
+        Page<DormManager> result = dormManagerService.selectPageWithArea(page, search);
+        return Result.success(result);
+    }
+
+    // 查询所有宿管信息（包含管辖区域信息）
+    @GetMapping
+    public Result<List<DormManager>> findAll() {
+        List<DormManager> list = dormManagerService.selectListWithArea();
+        return Result.success(list);
+    }
+
+    // 根据用户名查询宿管信息（包含管辖区域信息）
+    @GetMapping("/{username}")
+    public Result<DormManager> findOne(@PathVariable String username) {
+        DormManager dormManager = dormManagerService.selectByUsernameWithArea(username);
+        return Result.success(dormManager);
+    }
+
+    // 添加宿管（支持楼栋宿管和围合宿管）
+    @PostMapping
+    public Result<?> save(@RequestBody DormManager dormManager) {
+        try {
+            boolean success = dormManagerService.addManager(dormManager);
+            if (success) {
+                return Result.success();
+            } else {
+                return Result.error("500", "添加失败");
+            }
+        } catch (Exception e) {
+            return Result.error("500", e.getMessage());
+        }
+    }
+
+    // 更新宿管信息（支持楼栋宿管和围合宿管）
+    @PutMapping
+    public Result<?> updateManager(@RequestBody DormManager dormManager) {
+        try {
+            boolean success = dormManagerService.updateManager(dormManager);
+            if (success) {
+                return Result.success();
+            } else {
+                return Result.error("500", "更新失败");
+            }
+        } catch (Exception e) {
+            return Result.error("500", e.getMessage());
+        }
+    }
+
+    // 删除宿管
+    @DeleteMapping("/{username}")
+    public Result<?> deleteManager(@PathVariable String username) {
+        int result = dormManagerService.deleteDormManager(username);
+        if (result > 0) {
+            return Result.success();
+        } else {
+            return Result.error("500", "删除失败");
         }
     }
 }

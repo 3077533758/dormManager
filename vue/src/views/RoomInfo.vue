@@ -20,6 +20,18 @@
               </el-tooltip>
             </div>
           </div>
+          <!-- 围合选择 -->
+          <div style="margin: 10px 0">
+            <el-radio-group v-model="selectedCompoundId" @change="handleCompoundChange">
+              <el-radio-button v-for="c in compoundList" :key="c.compoundId" :label="c.compoundId">{{ c.compoundName }}</el-radio-button>
+            </el-radio-group>
+            <el-radio-group v-model="selectedBuildId" @change="handleBuildChange" style="margin-left: 20px">
+              <el-radio-button v-for="b in buildList" :key="b.buildId" :label="b.buildId">{{ b.buildName }}</el-radio-button>
+            </el-radio-group>
+            <el-radio-group v-model="selectedFloorNum" @change="handleFloorChange" style="margin-left: 20px">
+              <el-radio-button v-for="f in floorList" :key="f.floorNum" :label="f.floorNum">{{ f.floorNum }}层</el-radio-button>
+            </el-radio-group>
+          </div>
         </div>
         <!--    表格-->
         <el-table v-loading="loading" :data="tableData" border max-height="705" style="width: 100%">

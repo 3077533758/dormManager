@@ -11,8 +11,8 @@ import com.example.springboot.service.DormManagerService;
 import com.example.springboot.service.StudentService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import sun.misc.BASE64Encoder;
 
+import java.util.Base64;
 import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -130,9 +130,7 @@ public class FileController {
         byte[] fileByte = bos.toByteArray();
 
         //进行base64编码
-        BASE64Encoder encoder = new BASE64Encoder();
-        String data = encoder.encode(fileByte);
-
+        String data = Base64.getEncoder().encodeToString(fileByte);
         fileInputStream.close();
         bos.close();
         return Result.success(data);

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.mapper.DormManagerMapper">
+
+    <!-- 分页查询宿管信息（包含管辖区域信息） -->
+    <select id="selectPageWithArea" resultType="com.example.springboot.entity.DormManager">
+        SELECT 
+            dm.username,
+            dm.password,
+            dm.dormbuild_id as dormbuildId,
+            dm.compound_id as compoundId,
+            dm.manager_type as managerType,
+            dm.name,
+            dm.gender,
+            dm.age,
+            dm.phone_num as phoneNum,
+            dm.email,
+            dm.avatar
+        FROM dorm_manager dm
+        <where>
+            <if test="search != null and search != ''">
+                AND (dm.username LIKE CONCAT('%', #{search}, '%') 
+                OR dm.name LIKE CONCAT('%', #{search}, '%')
+                OR dm.manager_type LIKE CONCAT('%', #{search}, '%'))
+            </if>
+        </where>
+        ORDER BY dm.username
+    </select>
+
+    <!-- 查询所有宿管信息（包含管辖区域信息） -->
+    <select id="selectListWithArea" resultType="com.example.springboot.entity.DormManager">
+        SELECT 
+            dm.username,
+            dm.password,
+            dm.dormbuild_id as dormbuildId,
+            dm.compound_id as compoundId,
+            dm.manager_type as managerType,
+            dm.name,
+            dm.gender,
+            dm.age,
+            dm.phone_num as phoneNum,
+            dm.email,
+            dm.avatar
+        FROM dorm_manager dm
+        ORDER BY dm.username
+    </select>
+
+    <!-- 根据用户名查询宿管信息（包含管辖区域信息） -->
+    <select id="selectByUsernameWithArea" resultType="com.example.springboot.entity.DormManager">
+        SELECT 
+            dm.username,
+            dm.password,
+            dm.dormbuild_id as dormbuildId,
+            dm.compound_id as compoundId,
+            dm.manager_type as managerType,
+            dm.name,
+            dm.gender,
+            dm.age,
+            dm.phone_num as phoneNum,
+            dm.email,
+            dm.avatar
+        FROM dorm_manager dm
+        WHERE dm.username = #{username}
+    </select>
+
+</mapper> 

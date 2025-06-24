@@ -3,7 +3,7 @@ import request from "@/utils/request";
 const {ElMessage} = require("element-plus");
 
 export default {
-    name: "StuInfo",
+    name: "DormManagerInfo",
     components: {},
     data() {
         // 手机号验证
@@ -47,10 +47,12 @@ export default {
             disabled: false,
             judge: false,
             dialogVisible: false,
+            areaSelectorVisible: false,
             search: "",
             currentPage: 1,
             pageSize: 10,
             total: 0,
+            pageNum: 1,
             tableData: [],
             form: {
                 username: "",
@@ -59,7 +61,9 @@ export default {
                 gender: "",
                 phoneNum: "",
                 email: "",
-                dormBuildId: "",
+                dormbuildId: "",
+                compoundId: null,
+                managerType: "楼栋宿管"
             },
             rules: {
                 username: [
@@ -102,7 +106,8 @@ export default {
                     },
                 ],
                 checkPass: [{validator: checkPass, trigger: "blur"}],
-                dormBuildId: [],
+                dormbuildId: [],
+                compoundId: [],
             },
             editDisplay: {
                 display: "block",
@@ -110,21 +115,25 @@ export default {
             display: {
                 display: "none",
             },
+            buildings: [],
+            compounds: [],
+            multipleSelection: [],
         };
     },
     created() {
         this.load();
         this.loading = true;
         setTimeout(() => {
-            //设置延迟执行
             this.loading = false;
         }, 1000);
+        this.loadBuildings();
+        this.loadCompounds();
     },
     methods: {
         async load() {
             request.get("/dormManager/find", {
                 params: {
-                    pageNum: this.currentPage,
+                    pageNum: this.pageNum,
                     pageSize: this.pageSize,
                     search: this.search,
                 },
@@ -135,74 +144,75 @@ export default {
                 this.loading = false;
             });
         },
-        reset() {
-            this.search = ''
-            request.get("/dormManager/find", {
-                params: {
-                    pageNum: 1,
-                    pageSize: this.pageSize,
-                    search: this.search,
-                },
-            }).then((res) => {
-                console.log(res);
-                this.tableData = res.data.records;
-                this.total = res.data.total;
-                this.loading = false;
+        loadBuildings() {
+            request.get("/building/getAllWithCompound").then(res => {
+                if (res.code === '0') {
+                    this.buildings = res.data;
+                } else {
+                    this.$message.error("获取楼栋列表失败: " + res.msg);
+                }
             });
+        },
+        loadCompounds() {
+            request.get("/compound/getAll").then(res => {
+                if (res.code === '0') {
+                    this.compounds = res.data;
+                } else {
+                    this.$message.error("获取围合列表失败: " + res.msg);
+                }
+            });
+        },
+        getBuildingName(buildingId) {
+            const building = this.buildings.find(b => b.dormBuildId === buildingId);
+            return building ? building.dormBuildName : `${buildingId}号楼`;
+        },
+        getCompoundName(compoundId) {
+            const compound = this.compounds.find(c => c.compoundId === compoundId);
+            return compound ? compound.compoundName : `${compoundId}围合`;
+        },
+        showAreaSelector() {
+            this.areaSelectorVisible = true;
+        },
+        selectBuilding(row) {
+            this.form.dormbuildId = row.dormBuildId;
+            this.form.compoundId = null;
+            this.areaSelectorVisible = false;
+            this.$message.success(`已选择：${row.dormBuildName}`);
+        },
+        selectCompound(row) {
+            this.form.compoundId = row.compoundId;
+            this.form.dormbuildId = null;
+            this.areaSelectorVisible = false;
+            this.$message.success(`已选择：${row.compoundName}`);
         },
         filterTag(value, row) {
             return row.gender === value;
         },
-        add() {
-            this.dialogVisible = true;
-            this.$nextTick(() => {
-                this.$refs.form.resetFields();
-                this.judgeAddOrEdit = false;
-                this.editDisplay = {display: "none"};
-                this.disabled = false;
-                this.form = {};
-                this.judge = false;
-            });
-        },
         save() {
             this.$refs.form.validate(async (valid) => {
                 if (valid) {
-                    if (this.judge === false) {
-                        //新增
-                        request.post("/dormManager/add", this.form).then((res) => {
-                            console.log(res);
-                            if (res.code === "0") {
-                                ElMessage({
-                                    message: "新增成功",
-                                    type: "success",
-                                });
-                                this.search = "";
-                                this.load();
-                                this.dialogVisible = false;
-                            } else {
-                                ElMessage({
-                                    message: res.msg,
-                                    type: "error",
-                                });
-                            }
-                        });
-                    } else {
-                        //修改
+                    if (this.form.username) {
+                        // 修改
                         request.put("/dormManager/update", this.form).then((res) => {
                             console.log(res);
                             if (res.code === "0") {
-                                ElMessage({
-                                    message: "修改成功",
-                                    type: "success",
-                                });
-                                this.search = "";
-                                this.load();
+                                this.$message.success("修改成功");
                                 this.dialogVisible = false;
+                                this.load();
                             } else {
-                                ElMessage({
-                                    message: res.msg,
-                                    type: "error",
-                                });
+                                this.$message.error(res.msg);
+                            }
+                        });
+                    } else {
+                        // 新增
+                        request.post("/dormManager/add", this.form).then((res) => {
+                            console.log(res);
+                            if (res.code === "0") {
+                                this.$message.success("新增成功");
+                                this.dialogVisible = false;
+                                this.load();
+                            } else {
+                                this.$message.error(res.msg);
                             }
                         });
                     }
@@ -230,11 +240,26 @@ export default {
                 this.disabled = true;
             }
         },
+        handleAdd() {
+            this.dialogVisible = true;
+            this.$nextTick(() => {
+                this.$refs.form.resetFields();
+                this.judgeAddOrEdit = false;
+                this.editDisplay = {display: "none"};
+                this.disabled = false;
+                this.form = {
+                    password: '123456',
+                    managerType: '楼栋宿管',
+                    gender: '男'
+                };
+                this.judge = false;
+            });
+        },
         handleEdit(row) {
             //修改
             //判断操作类型
             this.judge = true;
-            // 生拷贝
+            // 深拷贝
             this.dialogVisible = true;
             this.$nextTick(() => {
                 this.$refs.form.resetFields();
@@ -249,29 +274,33 @@ export default {
             console.log(username);
             request.delete("/dormManager/delete/" + username).then((res) => {
                 if (res.code === "0") {
-                    ElMessage({
-                        message: "删除成功",
-                        type: "success",
-                    });
-                    this.search = "";
+                    this.$message.success("删除成功");
                     this.load();
                 } else {
-                    ElMessage({
-                        message: res.msg,
-                        type: "error",
-                    });
+                    this.$message.error(res.msg);
                 }
             });
         },
+        handleSelectionChange(val) {
+            console.log(val);
+            this.multipleSelection = val;
+        },
+        reset() {
+            this.search = '';
+            this.load();
+        },
         handleSizeChange(pageSize) {
-            //改变每页个数
             this.pageSize = pageSize;
             this.load();
         },
         handleCurrentChange(pageNum) {
-            //改变页码
-            this.currentPage = pageNum;
+            this.pageNum = pageNum;
             this.load();
+        },
+        handleManagerTypeChange() {
+            // 切换宿管类型时清空管辖区域
+            this.form.dormbuildId = null;
+            this.form.compoundId = null;
         },
     },
 };

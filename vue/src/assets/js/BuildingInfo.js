@@ -16,10 +16,13 @@ export default {
             pageSize: 10,
             total: 0,
             tableData: [],
+            compoundOptions: [], // 围合选项
             form: {
                 dormBuildId: "",
                 dormBuildName: "",
                 dormBuildDetail: "",
+                campus: "",
+                compoundId: "",
             },
             rules: {
                 dormBuildId: [
@@ -32,6 +35,12 @@ export default {
                 ],
                 dormBuildName: [
                     {required: true, message: "请输入名称", trigger: "blur"},
+                ],
+                campus: [
+                    {required: true, message: "请选择园区", trigger: "change"},
+                ],
+                compoundId: [
+                    {required: true, message: "请选择围合", trigger: "change"},
                 ],
                 dormBuildDetail: [
                     {required: true, message: "请输入备注", trigger: "blur"},
@@ -80,6 +89,23 @@ export default {
         filterTag(value, row) {
             return row.dormBuildDetail === value;
         },
+        // 加载围合选项
+        loadCompoundOptions(campus) {
+            if (campus) {
+                request.get(`/compound/getByCampus/${campus}`).then((res) => {
+                    if (res.code === "0") {
+                        this.compoundOptions = res.data;
+                    }
+                });
+            } else {
+                this.compoundOptions = [];
+            }
+        },
+        // 园区变化时更新围合选项
+        onCampusChange(campus) {
+            this.form.compoundId = ""; // 清空围合选择
+            this.loadCompoundOptions(campus);
+        },
         add() {
             this.dialogVisible = true;
             this.$nextTick(() => {
@@ -87,6 +113,7 @@ export default {
                 this.disabled = false;
                 this.form = {};
                 this.judge = false;
+                this.compoundOptions = [];
             });
         },
         save() {
@@ -144,9 +171,11 @@ export default {
             this.dialogVisible = true;
             this.$nextTick(() => {
                 this.$refs.form.resetFields();
-                // 生拷贝
+                // 深拷贝
                 this.form = JSON.parse(JSON.stringify(row));
                 this.disabled = true;
+                // 加载对应的围合选项
+                this.loadCompoundOptions(this.form.campus);
             });
         },
         handleDelete(id) {

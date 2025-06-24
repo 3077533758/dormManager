@@ -35,4 +35,8 @@ public class Student {
     private String email;
     @TableField("avatar")
     private String avatar;
+    @TableField(value = "dorm_build_id", exist = false)
+    private Integer dormBuildId;
+    @TableField(value = "dorm_room_id", exist = false)
+    private Integer dormRoomId;
 }
