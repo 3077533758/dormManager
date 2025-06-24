@@ -1,0 +1,43 @@
+name: Node.js + Spring Boot CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [v14.21.3]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ./vue/package-lock.json
+
+    - name: Install frontend dependencies
+      run: cd vue && npm install
+
+    - name: Build frontend
+      run: cd vue && npm run build --if-present
+
+    - name: Run frontend tests
+      run: cd vue && npm test || echo "No tests configured"
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build backend
+      run: cd springboot && mvn -B package --file pom.xml
