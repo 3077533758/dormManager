@@ -64,4 +64,11 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
         return adjustRoomMapper.selectPage(page, queryWrapper);
     }
 
+    @Override
+    public boolean hasPendingAdjust(String username) {
+        QueryWrapper<AdjustRoom> qw = new QueryWrapper<>();
+        qw.eq("username", username).eq("state", "未处理");
+        return adjustRoomMapper.selectCount(qw) > 0;
+    }
+
 }

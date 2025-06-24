@@ -70,20 +70,28 @@ export default {
                 })
                 return
             }
-            
-            this.dialogVisible = true
-            this.$nextTick(() => {
-                this.$refs.form.resetFields()
-                const user = JSON.parse(sessionStorage.getItem("user"))
-                this.form.username = user.username
-                this.form.name = user.name
-                
-                // 获取学生当前宿舍信息
-                request.get("/room/getMyRoom/" + user.username).then((res) => {
-                    if (res.code === "0") {
-                        this.form.dormRoomId = res.data.dormRoomId
-                        this.form.bedNumber = this.calBedNum(user.username, res.data)
-                    }
+            const user = JSON.parse(sessionStorage.getItem("user"))
+            // 新增：校验未处理调宿申请
+            request.get(`/stu/apply-status/${user.username}`).then((res) => {
+                if (res.data.hasPendingAdjust) {
+                    ElMessage({
+                        message: "您有未处理的调宿申请，不能再提交退宿申请！",
+                        type: "warning"
+                    })
+                    return
+                }
+                this.dialogVisible = true
+                this.$nextTick(() => {
+                    this.$refs.form.resetFields()
+                    this.form.username = user.username
+                    this.form.name = user.name
+                    // 获取学生当前宿舍信息
+                    request.get("/room/getMyRoom/" + user.username).then((res) => {
+                        if (res.code === "0") {
+                            this.form.dormRoomId = res.data.dormRoomId
+                            this.form.bedNumber = this.calBedNum(user.username, res.data)
+                        }
+                    })
                 })
             })
         },

@@ -143,17 +143,28 @@ export default {
                 })
                 return
             }
-            this.dialogVisible = true;
-            this.$nextTick(() => {
-                this.$refs.form.resetFields();
-                this.form.username = JSON.parse(sessionStorage.getItem("user")).username;
-                this.form.name = JSON.parse(sessionStorage.getItem("user")).name;
-                request.get("/room/getMyRoom/" + this.form.username).then((res) => {
-                    this.form.currentRoomId = res.data.dormRoomId
-                    this.form.currentBedId = this.calBedNum(this.form.username, res.data)
+            const user = JSON.parse(sessionStorage.getItem("user"))
+            // 新增：校验未处理退宿申请
+            request.get(`/stu/apply-status/${user.username}`).then((res) => {
+                if (res.data.hasPendingQuit) {
+                    ElMessage({
+                        message: "您有未处理的退宿申请，不能再提交调宿申请！",
+                        type: "warning"
+                    })
+                    return
+                }
+                this.dialogVisible = true;
+                this.$nextTick(() => {
+                    this.$refs.form.resetFields();
+                    this.form.username = user.username;
+                    this.form.name = user.name;
+                    request.get("/room/getMyRoom/" + this.form.username).then((res) => {
+                        this.form.currentRoomId = res.data.dormRoomId
+                        this.form.currentBedId = this.calBedNum(this.form.username, res.data)
+                    });
+                    this.judgeOption = true;
                 });
-                this.judgeOption = true;
-            });
+            })
         },
         calBedNum(username, data) {
             if (data.firstBed === username) {

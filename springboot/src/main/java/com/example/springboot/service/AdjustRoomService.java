@@ -20,4 +20,7 @@ public interface AdjustRoomService extends IService<AdjustRoom> {
 
     Page findByUsername(String username, Integer pageNum, Integer pageSize);
 
+    // 查询是否有未处理的调宿申请
+    boolean hasPendingAdjust(String username);
+
 }

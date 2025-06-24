@@ -63,4 +63,11 @@ public class QuitRoomServiceImpl extends ServiceImpl<QuitRoomMapper, QuitRoom> i
         // 3. 清空 dorm_room 床位
         dormRoomService.deleteBedInfo("bed" + quitRoom.getBedNumber(), quitRoom.getDormRoomId(), -1);
     }
+
+    @Override
+    public boolean hasPendingQuit(String username) {
+        QueryWrapper<QuitRoom> qw = new QueryWrapper<>();
+        qw.eq("username", username).eq("state", "未处理");
+        return quitRoomMapper.selectCount(qw) > 0;
+    }
 }

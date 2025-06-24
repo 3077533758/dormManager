@@ -23,4 +23,7 @@ public interface QuitRoomService extends IService<QuitRoom> {
 
     // 退宿审批通过（同步三表）
     void approveQuitRoom(QuitRoom quitRoom);
+
+    // 查询是否有未处理的退宿申请
+    boolean hasPendingQuit(String username);
 }
