@@ -16,8 +16,6 @@ public class DormManager {
     private String username;
     private String password;
     private Integer dormbuildId;
-    private Integer compoundId;
-    private String managerType;
     private String name;
     private String gender;
     private Integer age;

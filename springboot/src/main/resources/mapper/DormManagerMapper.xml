@@ -8,8 +8,6 @@
             dm.username,
             dm.password,
             dm.dormbuild_id as dormbuildId,
-            dm.compound_id as compoundId,
-            dm.manager_type as managerType,
             dm.name,
             dm.gender,
             dm.age,
@@ -20,8 +18,7 @@
         <where>
             <if test="search != null and search != ''">
                 AND (dm.username LIKE CONCAT('%', #{search}, '%') 
-                OR dm.name LIKE CONCAT('%', #{search}, '%')
-                OR dm.manager_type LIKE CONCAT('%', #{search}, '%'))
+                OR dm.name LIKE CONCAT('%', #{search}, '%'))
             </if>
         </where>
         ORDER BY dm.username
@@ -33,8 +30,6 @@
             dm.username,
             dm.password,
             dm.dormbuild_id as dormbuildId,
-            dm.compound_id as compoundId,
-            dm.manager_type as managerType,
             dm.name,
             dm.gender,
             dm.age,
@@ -51,8 +46,6 @@
             dm.username,
             dm.password,
             dm.dormbuild_id as dormbuildId,
-            dm.compound_id as compoundId,
-            dm.manager_type as managerType,
             dm.name,
             dm.gender,
             dm.age,
