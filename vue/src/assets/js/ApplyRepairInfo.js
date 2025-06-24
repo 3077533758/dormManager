@@ -10,6 +10,7 @@ export default {
             loading: true,
             dialogVisible: false,
             detailDialog: false,
+            search: "",
             currentPage: 1,
             pageSize: 10,
             total: 0,
@@ -18,7 +19,6 @@ export default {
             name: '',
             username: '',
             form: {},
-            hasRoom: true,
             room: {
                 dormRoomId: '',
                 dormBuildId: '',
@@ -32,7 +32,6 @@ export default {
     },
     created() {
         this.init()
-        this.checkRoomStatus()
         this.getInfo()
         this.load()
         this.loading = true
@@ -47,35 +46,12 @@ export default {
             this.name = this.form.name;
             this.username = this.form.username;
         },
-        checkRoomStatus() {
-            request.get("/main/getStudentRoomStatus/" + this.username).then((res) => {
-                if (res.code === "0") {
-                    this.hasRoom = true
-                } else {
-                    this.hasRoom = false
-                    ElMessage({
-                        message: "您当前没有宿舍。如需帮助请联系宿管。",
-                        type: "warning",
-                        duration: 5000
-                    })
-                }
-            }).catch(() => {
-                this.hasRoom = false
-                ElMessage({
-                    message: "您当前没有宿舍。如需帮助请联系宿管。",
-                    type: "warning",
-                    duration: 5000
-                })
-            })
-        },
         async load() {
-            if (!this.hasRoom) {
-                return;
-            }
             request.get("/repair/find/" + this.name, {
                 params: {
                     pageNum: this.currentPage,
                     pageSize: this.pageSize,
+                    search: this.search,
                 },
             }).then((res) => {
                 console.log(res);
@@ -85,9 +61,6 @@ export default {
             });
         },
         getInfo() {
-            if (!this.hasRoom) {
-                return;
-            }
             request.get("/room/getMyRoom/" + this.username).then((res) => {
                 if (res.code === "0") {
                     this.room = res.data;
@@ -113,14 +86,6 @@ export default {
             this.detailDialog = false;
         },
         add() {
-            if (!this.hasRoom) {
-                ElMessage({
-                    message: "您当前没有宿舍。如需帮助请联系宿管。",
-                    type: "warning"
-                })
-                return
-            }
-            
             this.dialogVisible = true;
             this.$nextTick(() => {
                 this.$refs.form.resetFields();
@@ -140,6 +105,7 @@ export default {
                                 message: "新增成功",
                                 type: "success",
                             });
+                            this.search = "";
                             this.load();
                             this.dialogVisible = false;
                         } else {

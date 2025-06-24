@@ -30,15 +30,6 @@ public class QuitRoomServiceImpl extends ServiceImpl<QuitRoomMapper, QuitRoom> i
     }
 
     @Override
-    public Page findByUsername(String username, Integer pageNum, Integer pageSize) {
-        Page<QuitRoom> page = new Page<>(pageNum, pageSize);
-        QueryWrapper<QuitRoom> qw = new QueryWrapper<>();
-        qw.eq("username", username);
-        qw.orderByDesc("apply_time");
-        return quitRoomMapper.selectPage(page, qw);
-    }
-
-    @Override
     public int deleteQuit(Integer id) {
         return quitRoomMapper.deleteById(id);
     }

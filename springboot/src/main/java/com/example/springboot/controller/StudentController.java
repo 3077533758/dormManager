@@ -115,7 +115,7 @@ public class StudentController {
         if (student != null) {
             return Result.success(student);
         } else {
-            return Result.error("-1", "未查询到该生信息");
+            return Result.error("-1", "不存在该学生");
         }
     }
 }

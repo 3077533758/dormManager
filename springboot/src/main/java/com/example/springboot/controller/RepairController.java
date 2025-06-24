@@ -2,9 +2,7 @@ package com.example.springboot.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboot.common.Result;
-import com.example.springboot.entity.DormRoom;
 import com.example.springboot.entity.Repair;
-import com.example.springboot.service.DormRoomService;
 import com.example.springboot.service.RepairService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,20 +15,11 @@ public class RepairController {
     @Resource
     private RepairService repairService;
 
-    @Resource
-    private DormRoomService dormRoomService;
-
     /**
      * 添加订单
      */
     @PostMapping("/add")
     public Result<?> add(@RequestBody Repair repair) {
-        // 检查学生是否有宿舍
-        DormRoom dormRoom = dormRoomService.judgeHadBed(repair.getRepairer());
-        if (dormRoom == null) {
-            return Result.error("-1", "您当前没有宿舍，无法申请报修");
-        }
-        
         int i = repairService.addNewOrder(repair);
         if (i == 1) {
             return Result.success();
