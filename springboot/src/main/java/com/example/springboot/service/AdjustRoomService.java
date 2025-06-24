@@ -18,4 +18,6 @@ public interface AdjustRoomService extends IService<AdjustRoom> {
     // 添加
     int addApply(AdjustRoom adjustRoom);
 
+    Page findByUsername(String username, Integer pageNum, Integer pageSize);
+
 }

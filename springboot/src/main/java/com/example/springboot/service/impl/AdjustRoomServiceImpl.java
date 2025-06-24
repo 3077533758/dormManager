@@ -43,8 +43,7 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
      */
     @Override
     public int deleteAdjustment(Integer id) {
-        int i = adjustRoomMapper.deleteById(id);
-        return i;
+        return adjustRoomMapper.deleteById(id);
     }
 
 
@@ -57,5 +56,12 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
         return i;
     }
 
+    @Override
+    public Page findByUsername(String username, Integer pageNum, Integer pageSize) {
+        Page<AdjustRoom> page = new Page<>(pageNum, pageSize);
+        QueryWrapper<AdjustRoom> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
+        return adjustRoomMapper.selectPage(page, queryWrapper);
+    }
 
 }

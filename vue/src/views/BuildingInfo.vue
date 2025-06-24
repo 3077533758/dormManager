@@ -27,6 +27,8 @@
           <el-table-column label="#" type="index"/>
           <el-table-column label="编号" prop="dormBuildId" sortable/>
           <el-table-column label="名称" prop="dormBuildName"/>
+          <el-table-column label="园区" prop="campus"/>
+          <el-table-column label="围合" prop="compoundName"/>
           <el-table-column
               :filter-method="filterTag"
               :filters="[
@@ -72,6 +74,24 @@
               </el-form-item>
               <el-form-item label="名称" prop="dormBuildName">
                 <el-input v-model="form.dormBuildName" style="width: 80%"></el-input>
+              </el-form-item>
+              <el-form-item label="园区" prop="campus">
+                <el-select v-model="form.campus" placeholder="请选择园区" style="width: 80%" @change="onCampusChange">
+                  <el-option label="东园" value="东园"></el-option>
+                  <el-option label="西园" value="西园"></el-option>
+                  <el-option label="南园" value="南园"></el-option>
+                  <el-option label="北园" value="北园"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="围合" prop="compoundId">
+                <el-select v-model="form.compoundId" placeholder="请选择围合" style="width: 80%">
+                  <el-option 
+                    v-for="compound in compoundOptions" 
+                    :key="compound.compoundId" 
+                    :label="compound.compoundName" 
+                    :value="compound.compoundId">
+                  </el-option>
+                </el-select>
               </el-form-item>
               <el-form-item label="备注" prop="dormBuildDetail">
                 <el-input

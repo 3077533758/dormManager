@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.springboot.entity.DormBuild;
+import com.example.springboot.entity.DormBuildDTO;
 import com.example.springboot.mapper.DormBuildMapper;
 import com.example.springboot.service.DormBuildService;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,16 @@ public class DormBuildImpl extends ServiceImpl<DormBuildMapper, DormBuild> imple
     }
 
     /**
+     * 楼宇查找（包含围合信息）
+     */
+    @Override
+    public Page<DormBuildDTO> findWithCompound(Integer pageNum, Integer pageSize, String search) {
+        Page<DormBuildDTO> page = new Page<>(pageNum, pageSize);
+        Page<DormBuildDTO> buildingPage = dormBuildMapper.selectPageWithCompound(page, search);
+        return buildingPage;
+    }
+
+    /**
      * 楼宇信息更新
      */
     @Override
@@ -70,6 +81,15 @@ public class DormBuildImpl extends ServiceImpl<DormBuildMapper, DormBuild> imple
         qw.select("dormbuild_id");
         List<DormBuild> dormBuilds = dormBuildMapper.selectList(qw);
         return dormBuilds;
+    }
+
+    /**
+     * 获取所有楼栋信息（包含围合信息）
+     */
+    @Override
+    public List<DormBuildDTO> getAllBuildingsWithCompound() {
+        List<DormBuildDTO> buildings = dormBuildMapper.selectListWithCompound();
+        return buildings;
     }
 
 }

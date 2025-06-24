@@ -26,4 +26,8 @@ public class DormBuild {
     private String dormBuildName;
     @TableField("dormbuild_detail")
     private String dormBuildDetail;
+    @TableField("compound_id")
+    private Integer compoundId;
+    @TableField("campus")
+    private String campus;
 }

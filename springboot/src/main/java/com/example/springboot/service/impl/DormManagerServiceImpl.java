@@ -9,7 +9,7 @@ import com.example.springboot.service.DormManagerService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
+import java.util.List;
 
 @Service
 public class DormManagerServiceImpl extends ServiceImpl<DormManagerMapper, DormManager> implements DormManagerService {
@@ -71,9 +71,61 @@ public class DormManagerServiceImpl extends ServiceImpl<DormManagerMapper, DormM
      */
     @Override
     public int deleteDormManager(String username) {
-        int i = dormManagerMapper.deleteById(username);
-        return i;
+        return baseMapper.deleteById(username);
     }
 
+    @Override
+    public Page<DormManager> selectPageWithArea(Page<DormManager> page, String search) {
+        return baseMapper.selectPageWithArea(page, search);
+    }
 
+    @Override
+    public List<DormManager> selectListWithArea() {
+        return baseMapper.selectListWithArea();
+    }
+
+    @Override
+    public DormManager selectByUsernameWithArea(String username) {
+        return baseMapper.selectByUsernameWithArea(username);
+    }
+
+    @Override
+    public boolean addManager(DormManager dormManager) {
+        // 验证宿管类型和管辖区域的一致性
+        if ("楼栋宿管".equals(dormManager.getManagerType())) {
+            if (dormManager.getDormbuildId() == null) {
+                throw new RuntimeException("楼栋宿管必须指定管理的楼栋");
+            }
+            dormManager.setCompoundId(null);
+        } else if ("围合宿管".equals(dormManager.getManagerType())) {
+            if (dormManager.getCompoundId() == null) {
+                throw new RuntimeException("围合宿管必须指定管理的围合");
+            }
+            dormManager.setDormbuildId(null);
+        } else {
+            throw new RuntimeException("无效的宿管类型");
+        }
+        
+        return save(dormManager);
+    }
+
+    @Override
+    public boolean updateManager(DormManager dormManager) {
+        // 验证宿管类型和管辖区域的一致性
+        if ("楼栋宿管".equals(dormManager.getManagerType())) {
+            if (dormManager.getDormbuildId() == null) {
+                throw new RuntimeException("楼栋宿管必须指定管理的楼栋");
+            }
+            dormManager.setCompoundId(null);
+        } else if ("围合宿管".equals(dormManager.getManagerType())) {
+            if (dormManager.getCompoundId() == null) {
+                throw new RuntimeException("围合宿管必须指定管理的围合");
+            }
+            dormManager.setDormbuildId(null);
+        } else {
+            throw new RuntimeException("无效的宿管类型");
+        }
+        
+        return updateById(dormManager);
+    }
 }

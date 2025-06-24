@@ -31,11 +31,20 @@ export default {
                 }
             });
         };
+        const checkApplyState = (rule, value, callback) => {
+            console.log(this.form.finishTime)
+            if (value === "通过" && this.form.finishTime !== null) {
+                callback();
+            } else if (value === "驳回" && this.form.finishTime !== null) {
+                callback();
+            } else {
+                callback(new Error("请检查订单完成状态与选择时间是否匹配"));
+            }
+        };
         return {
             loading: true,
             dialogVisible: false,
             detailDialog: false,
-            search: "",
             currentPage: 1,
             pageSize: 10,
             total: 0,
@@ -44,6 +53,7 @@ export default {
             dormRoomId: 0,
             orderState: false,
             judgeOption: false,
+            hasRoom: true,
             rules: {
                 username: [
                     {required: true, message: "请输入学号", trigger: "blur"},
@@ -60,15 +70,24 @@ export default {
                     {required: true, message: "请输入当前床位号", trigger: "blur"},
                 ],
                 towardsRoomId: [
-                    {validator: checkRoomState, trigger: "blur"},
+                    {required: true, message: '请输入目标房间号', trigger: 'blur'},
+                    {validator: checkRoomState, trigger: 'blur'}
                 ],
                 towardsBedId: [
-                    {validator: checkBedState, trigger: "blur"},
+                    {required: true, message: '请输入目标床位号', trigger: 'blur'},
+                    {validator: checkBedState, trigger: 'blur'}
                 ],
+                applyTime: [
+                    {required: true, message: '请选择申请时间', trigger: 'change'}
+                ],
+                state: [
+                    {validator: checkApplyState, trigger: 'change'}
+                ]
             },
         }
     },
     created() {
+        this.checkRoomStatus()
         this.load();
         this.loading = true;
         setTimeout(() => {
@@ -77,23 +96,53 @@ export default {
         }, 1000);
     },
     methods: {
-        async load() {
-            request.get("/adjustRoom/find", {
+        checkRoomStatus() {
+            const username = JSON.parse(sessionStorage.getItem("user")).username
+            request.get("/main/getStudentRoomStatus/" + username).then((res) => {
+                if (res.code === "0") {
+                    this.hasRoom = true
+                } else {
+                    this.hasRoom = false
+                    ElMessage({
+                        message: "您当前没有宿舍。如需帮助请联系宿管。",
+                        type: "warning",
+                        duration: 5000
+                    })
+                }
+            }).catch(() => {
+                this.hasRoom = false
+                ElMessage({
+                    message: "您当前没有宿舍。如需帮助请联系宿管。",
+                    type: "warning",
+                    duration: 5000
+                })
+            })
+        },
+        load() {
+            this.loading = true
+            const username = JSON.parse(sessionStorage.getItem("user")).username
+            request.get("/adjustRoom/findByUsername/" + username, {
                 params: {
                     pageNum: this.currentPage,
-                    pageSize: this.pageSize,
-                    search: this.search,
-                },
-            }).then((res) => {
+                    pageSize: this.pageSize
+                }
+            }).then(res => {
                 this.tableData = res.data.records;
                 this.total = res.data.total;
                 this.loading = false;
             });
         },
         filterTag(value, row) {
-            return row.gender === value;
+            return row.state === value;
         },
         add() {
+            if (!this.hasRoom) {
+                ElMessage({
+                    message: "您当前没有宿舍。如需帮助请联系宿管。",
+                    type: "warning"
+                })
+                return
+            }
             this.dialogVisible = true;
             this.$nextTick(() => {
                 this.$refs.form.resetFields();
@@ -138,7 +187,6 @@ export default {
                                     message: "修改成功",
                                     type: "success",
                                 });
-                                this.search = "";
                                 this.load();
                                 this.dialogVisible = false;
                             } else if (res.msg === "重复操作") {
@@ -146,7 +194,6 @@ export default {
                                     message: res.msg,
                                     type: "error",
                                 });
-                                this.search = "";
                                 this.load();
                                 this.dialogVisible = false;
                             } else {
@@ -161,10 +208,9 @@ export default {
                         request.post("/adjustRoom/add", this.form).then((res) => {
                             if (res.code === "0") {
                                 ElMessage({
-                                    message: "添加成功",
+                                    message: "申请提交成功",
                                     type: "success",
                                 });
-                                this.search = "";
                                 this.load();
                                 this.dialogVisible = false;
                             } else {

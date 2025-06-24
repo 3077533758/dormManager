@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.mapper.DormBuildMapper">
+
+    <!-- 分页查询楼栋信息（包含围合名称） -->
+    <select id="selectPageWithCompound" resultType="com.example.springboot.entity.DormBuildDTO">
+        SELECT 
+            db.id,
+            db.dormbuild_id as dormBuildId,
+            db.dormbuild_name as dormBuildName,
+            db.dormbuild_detail as dormBuildDetail,
+            db.compound_id as compoundId,
+            db.campus,
+            dc.compound_name as compoundName
+        FROM dorm_build db
+        LEFT JOIN dorm_compound dc ON db.compound_id = dc.compound_id
+        <where>
+            <if test="search != null and search != ''">
+                AND (db.dormbuild_id LIKE CONCAT('%', #{search}, '%') 
+                OR db.dormbuild_name LIKE CONCAT('%', #{search}, '%')
+                OR db.campus LIKE CONCAT('%', #{search}, '%'))
+            </if>
+        </where>
+        ORDER BY db.dormbuild_id
+    </select>
+
+    <!-- 查询所有楼栋信息（包含围合名称） -->
+    <select id="selectListWithCompound" resultType="com.example.springboot.entity.DormBuildDTO">
+        SELECT 
+            db.id,
+            db.dormbuild_id as dormBuildId,
+            db.dormbuild_name as dormBuildName,
+            db.dormbuild_detail as dormBuildDetail,
+            db.compound_id as compoundId,
+            db.campus,
+            dc.compound_name as compoundName
+        FROM dorm_build db
+        LEFT JOIN dorm_compound dc ON db.compound_id = dc.compound_id
+        ORDER BY db.dormbuild_id
+    </select>
+
+</mapper> 

@@ -3,6 +3,7 @@ package com.example.springboot.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboot.common.Result;
 import com.example.springboot.entity.DormBuild;
+import com.example.springboot.entity.DormBuildDTO;
 import com.example.springboot.service.DormBuildService;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,13 +58,13 @@ public class DormBuildController {
     }
 
     /**
-     * 楼宇查找
+     * 楼宇查找（包含围合信息）
      */
     @GetMapping("/find")
     public Result<?> findPage(@RequestParam(defaultValue = "1") Integer pageNum,
                               @RequestParam(defaultValue = "10") Integer pageSize,
                               @RequestParam(defaultValue = "") String search) {
-        Page page = dormBuildService.find(pageNum, pageSize, search);
+        Page<DormBuildDTO> page = dormBuildService.findWithCompound(pageNum, pageSize, search);
         if (page != null) {
             return Result.success(page);
         } else {
@@ -85,5 +86,18 @@ public class DormBuildController {
             return Result.error("-1", "查询失败");
         }
 
+    }
+
+    /**
+     * 获取所有楼栋信息（包含围合信息）
+     */
+    @GetMapping("/getAllWithCompound")
+    public Result<?> getAllWithCompound() {
+        List<DormBuildDTO> buildings = dormBuildService.getAllBuildingsWithCompound();
+        if (buildings != null) {
+            return Result.success(buildings);
+        } else {
+            return Result.error("-1", "查询失败");
+        }
     }
 }

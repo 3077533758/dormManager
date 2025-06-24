@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.springboot.entity.OutLive;
 import com.example.springboot.mapper.OutLiveMapper;
 import com.example.springboot.service.OutLiveService;
+import com.example.springboot.service.DormRoomService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -15,6 +17,8 @@ public class OutLiveServiceImpl extends ServiceImpl<OutLiveMapper, OutLive> impl
 
     @Resource
     private OutLiveMapper outLiveMapper;
+    @Resource
+    private DormRoomService dormRoomService;
 
     @Override
     public int addOutLive(OutLive outLive) {
@@ -37,5 +41,26 @@ public class OutLiveServiceImpl extends ServiceImpl<OutLiveMapper, OutLive> impl
         QueryWrapper<OutLive> qw = new QueryWrapper<>();
         qw.like("username", search).or().like("name", search);
         return outLiveMapper.selectPage(page, qw);
+    }
+
+    @Override
+    public Page findByUsername(String username, Integer pageNum, Integer pageSize) {
+        Page<OutLive> page = new Page<>(pageNum, pageSize);
+        QueryWrapper<OutLive> qw = new QueryWrapper<>();
+        qw.eq("username", username);
+        qw.orderByDesc("apply_time");
+        return outLiveMapper.selectPage(page, qw);
+    }
+
+    @Override
+    @Transactional
+    public void approveOutLive(OutLive outLive) {
+        // 1. 更新 out_live
+        outLive.setState("通过");
+        outLive.setFinishTime(java.time.LocalDateTime.now().toString());
+        outLiveMapper.updateById(outLive);
+
+        // 2. 如需腾空床位，可调用 dormRoomService.deleteBedInfo
+        // dormRoomService.deleteBedInfo(...);
     }
 }

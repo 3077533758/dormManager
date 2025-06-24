@@ -1,0 +1,494 @@
+/* 园区监控页面专用样式 */
+
+/* 页面背景动画 */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.campus-monitor {
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* 容器样式 */
+.monitor-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* 统计卡片网格布局 */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* 统计卡片基础样式 */
+.stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.stat-card:hover::before {
+  left: 100%;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* 卡片内容布局 */
+.stat-content {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 图标容器样式 */
+.stat-icon {
+  margin-right: 20px;
+  padding: 15px;
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-icon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  opacity: 0.3;
+  border-radius: inherit;
+}
+
+/* 不同卡片的图标背景色 */
+.total-card .stat-icon {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.room-card .stat-icon {
+  background: linear-gradient(135deg, #67C23A, #85ce61);
+  color: white;
+}
+
+.bed-card .stat-icon {
+  background: linear-gradient(135deg, #E6A23C, #ebb563);
+  color: white;
+}
+
+.occupied-card .stat-icon {
+  background: linear-gradient(135deg, #F56C6C, #f78989);
+  color: white;
+}
+
+.available-card .stat-icon {
+  background: linear-gradient(135deg, #909399, #a6a9ad);
+  color: white;
+}
+
+.rate-card .stat-icon {
+  background: linear-gradient(135deg, #9C27B0, #ba68c8);
+  color: white;
+}
+
+/* 统计信息样式 */
+.stat-info {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+  margin-bottom: 5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #7f8c8d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 园区详情卡片 */
+.campus-details {
+  margin-bottom: 30px;
+}
+
+.campus-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.campus-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 200% 100%;
+  animation: gradientShift 3s ease infinite;
+}
+
+.campus-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* 园区头部样式 */
+.campus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.campus-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 园区统计网格 */
+.campus-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-radius: 15px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.stat-item .label {
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+}
+
+.stat-item .value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.stat-item .value.occupied {
+  color: #e74c3c;
+  text-shadow: 0 1px 2px rgba(231, 76, 60, 0.3);
+}
+
+.stat-item .value.available {
+  color: #27ae60;
+  text-shadow: 0 1px 2px rgba(39, 174, 96, 0.3);
+}
+
+/* 围合部分样式 */
+.compounds-section {
+  margin-top: 25px;
+}
+
+.compounds-section h4 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+  position: relative;
+  padding-left: 15px;
+}
+
+.compounds-section h4::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+/* 围合统计样式 */
+.compound-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, rgba(103, 194, 58, 0.1), rgba(133, 206, 97, 0.1));
+  border-radius: 12px;
+  border: 1px solid rgba(103, 194, 58, 0.2);
+}
+
+.compound-stats .stat-item {
+  font-size: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.compound-stats .stat-item .label {
+  font-size: 12px;
+}
+
+.compound-stats .stat-item .value {
+  font-size: 14px;
+}
+
+/* 楼栋列表样式 */
+.buildings-list {
+  margin-top: 20px;
+}
+
+.buildings-list .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.buildings-list .el-table th {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+}
+
+.buildings-list .el-table td {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* 进度条样式 */
+.el-progress-bar__outer {
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.el-progress-bar__inner {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+/* 刷新按钮样式 */
+.refresh-section {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.refresh-section .el-button {
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 30px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-section .el-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.refresh-section .el-button:hover::before {
+  left: 100%;
+}
+
+.refresh-section .el-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+}
+
+/* 折叠面板样式 */
+.el-collapse {
+  border: none;
+  background: transparent;
+}
+
+.el-collapse-item__header {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border: none;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.el-collapse-item__header:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+  transform: translateX(5px);
+}
+
+.el-collapse-item__content {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+/* 标签样式 */
+.el-tag {
+  border-radius: 15px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .campus-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .compound-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .campus-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .campus-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .compound-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+  }
+  
+  .campus-name {
+    font-size: 16px;
+  }
+}
+
+/* 加载动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card,
+.campus-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+.stat-card:nth-child(5) { animation-delay: 0.5s; }
+.stat-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+} 
