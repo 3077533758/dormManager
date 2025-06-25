@@ -73,15 +73,20 @@
 
 1. 创建数据库：`db1`
 2. 执行项目根目录下的 `springboot/db/dormitory.sql` 脚本，初始化所有表结构及测试数据
-3. 修改数据库配置（位于 `springboot/src/main/resources/application.yml`）：
+3. 配置数据库连接（推荐使用 `application-local.yml`，避免误提交敏感信息）：
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://127.0.0.1:3306/db1?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
-    username: root
-    password: your_password
-```
+   - 创建一个 `springboot/src/main/resources/application-local.yml` 文件，内容如下（仅供参考）：
+
+   ```yaml
+   spring:
+     datasource:
+       url: jdbc:mysql://127.0.0.1:3306/db1?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
+       username: root
+       password: your_password
+  - 项目已默认激活 local 配置，Spring Boot 将自动加载此文件。
+  - **请勿将此文件提交到 Git**（已在 .gitignore 中排除）。
+
+
 
 ### ✅ 快速启动
 
@@ -90,7 +95,15 @@ spring:
 # Linux/Mac
 ./start.sh
 ```
+该脚本会自动执行以下操作：
 
+- 检查是否使用非 root 用户运行
+- 检查 JDK 版本是否为 1.8
+- 自动解析 application-local.yml 或 application.yml 中的数据库配置
+- 使用 nc 测试数据库端口是否可连接
+- 后台并发启动后端（Spring Boot）和前端（Vue）
+
+按下 Ctrl+C 可安全终止两个进程。
 #### 方式二：手动启动
 ```bash
 # 1. 启动后端
