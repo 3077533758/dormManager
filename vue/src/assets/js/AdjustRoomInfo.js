@@ -108,6 +108,7 @@ export default {
             return row.gender === value;
         },
         judgeOrderState(state) {
+            this.form.state = state;
             if (state === '通过') {
                 this.orderState = true
             } else if (state === '驳回') {

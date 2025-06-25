@@ -21,10 +21,8 @@
         <el-button v-if="hasRoom" type="primary" @click="add" icon="Plus">申请退宿</el-button>
       </div>
 
-      <el-table :data="tableData" stripe border :header-cell-class-name="'headerBg'"
-                @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column prop="id" label="ID" width="80"></el-table-column>
+      <el-table :data="tableData" stripe border :header-cell-class-name="'headerBg'">
+        <el-table-column type="index" label="#" width="60"></el-table-column>
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="name" label="姓名"></el-table-column>
         <el-table-column prop="dormRoomId" label="宿舍号"></el-table-column>

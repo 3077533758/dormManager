@@ -109,18 +109,14 @@
                 ></el-date-picker>
               </el-form-item>
               <el-form-item label="申请状态" prop="state">
-                <el-radio v-model="form.state" label="通过">通过</el-radio>
-                <el-radio v-if="this.form.state!=='通过'" v-model="form.state" label="驳回">驳回</el-radio>
+                <el-radio-group v-model="form.state">
+                  <el-radio label="通过">通过</el-radio>
+                  <el-radio label="驳回">驳回</el-radio>
+                  <el-radio label="未处理">未处理</el-radio>
+                </el-radio-group>
               </el-form-item>
               <el-form-item label="处理时间" prop="finishTime" style="margin-top: 27px">
-                <el-date-picker
-                    v-model="form.finishTime"
-                    clearable
-                    placeholder="选择时间"
-                    style="width: 50%"
-                    type="datetime"
-                    value-format="YYYY-MM-DD HH:mm:ss"
-                ></el-date-picker>
+                <el-input v-model="form.finishTime" disabled style="width: 80%"></el-input>
               </el-form-item>
             </el-form>
             <template #footer>

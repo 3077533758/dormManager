@@ -52,6 +52,12 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
      */
     @Override
     public int updateApply(AdjustRoom adjustRoom) {
+        // 自动设置处理时间
+        if ("通过".equals(adjustRoom.getState()) || "驳回".equals(adjustRoom.getState())) {
+            adjustRoom.setFinishTime(java.time.LocalDateTime.now().toString());
+        } else {
+            adjustRoom.setFinishTime(null);
+        }
         int i = adjustRoomMapper.updateById(adjustRoom);
         return i;
     }
