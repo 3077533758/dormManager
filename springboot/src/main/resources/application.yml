@@ -1,11 +1,16 @@
-#Tomcat端口号 默认是8080端口
+# application.yml (committed to Git)
+
 server:
   port: 9090
+
 spring:
+  profiles:
+    active: local  # Automatically load application-local.yml
+
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/db1?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
-    username: root
-    password: 8321
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis-plus:
