@@ -51,7 +51,6 @@ cleanup() {
   echo -e "\n${RED}Stopping all processes...${NC}"
   [[ -n "$BACKEND_PID" ]] && kill $BACKEND_PID 2>/dev/null && echo -e "${RED}Backend stopped.${NC}"
   [[ -n "$FRONTEND_PID" ]] && kill $FRONTEND_PID 2>/dev/null && echo -e "${RED}Frontend stopped.${NC}"
-  exit 0
 }
 trap cleanup SIGINT
 
@@ -75,5 +74,9 @@ echo -e "${GREEN}Backend (PID $BACKEND_PID) and frontend (PID $FRONTEND_PID) sta
 echo -e "${GREEN}Press Ctrl+C to stop both.${NC}"
 
 # Wait for both processes
-wait $BACKEND_PID
+wait $BACKEND_PID 
+echo "wait PBACKEND returned $?"
 wait $FRONTEND_PID
+echo "wait FRONTEND returned $?"
+exit 0
+
