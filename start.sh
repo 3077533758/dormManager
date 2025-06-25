@@ -24,28 +24,35 @@ else
   exit 1
 fi
 
-# Extract MySQL host and port from application.yml
-YML_PATH="./springboot/src/main/resources/application.yml"
-DB_HOST=$(grep -E "jdbc:mysql://" "$YML_PATH" | sed -E 's/.*jdbc:mysql:\/\/([^:\/]+):([0-9]+).*/\1/')
-DB_PORT=$(grep -E "jdbc:mysql://" "$YML_PATH" | sed -E 's/.*jdbc:mysql:\/\/([^:\/]+):([0-9]+).*/\2/')
+# Determine which config file to use: local first, fallback to default
+YML_DIR="./springboot/src/main/resources"
+if [ -f "$YML_DIR/application-local.yml" ]; then
+  CONFIG_FILE="$YML_DIR/application-local.yml"
+  echo -e "${GREEN}Using local config: application-local.yml${NC}"
+else
+  CONFIG_FILE="$YML_DIR/application.yml"
+  echo -e "${GREEN}Using default config: application.yml${NC}"
+fi
+
+# Extract DB host and port from config
+DB_HOST=$(grep -E "jdbc:mysql://" "$CONFIG_FILE" | sed -E 's/.*jdbc:mysql:\/\/([^:\/]+):([0-9]+).*/\1/')
+DB_PORT=$(grep -E "jdbc:mysql://" "$CONFIG_FILE" | sed -E 's/.*jdbc:mysql:\/\/([^:\/]+):([0-9]+).*/\2/')
 
 echo -e "${GREEN}Checking database connectivity to $DB_HOST:$DB_PORT...${NC}"
 if nc -z "$DB_HOST" "$DB_PORT"; then
   echo -e "${GREEN}Database connection OK.${NC}"
 else
-  echo -e "${RED}Error: Cannot connect to MySQL at $DB_HOST:$DB_PORT. Please make sure the database is running.${NC}"
+  echo -e "${RED}Error: Cannot connect to MySQL at $DB_HOST:$DB_PORT. Make sure the database is running.${NC}"
   exit 1
 fi
 
-# Define cleanup function
+# Define cleanup function for Ctrl+C
 cleanup() {
   echo -e "\n${RED}Stopping all processes...${NC}"
   [[ -n "$BACKEND_PID" ]] && kill $BACKEND_PID 2>/dev/null && echo -e "${RED}Backend stopped.${NC}"
   [[ -n "$FRONTEND_PID" ]] && kill $FRONTEND_PID 2>/dev/null && echo -e "${RED}Frontend stopped.${NC}"
   exit 0
 }
-
-# Trap Ctrl+C
 trap cleanup SIGINT
 
 # Start Spring Boot backend
