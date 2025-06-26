@@ -46,19 +46,19 @@ export default {
                 secondBed: "",
                 thirdBed: "",
                 fourthBed: "",
+                inputRoom: ""
             },
             rules: {
-                dormRoomId: [
-                    {required: true, message: "请输入房间号", trigger: "blur"},
-                    {pattern: /^[0-9]{4}$/, message: "范围：1000-9999", trigger: "blur"},
+                inputRoom: [
+                    {required: true, message: "请输入三位房间号", trigger: "blur"},
+                    {pattern: /^[1-9][0-9]{2}$/, message: "格式如101, 305，楼层1-9，房号01-99", trigger: "blur"},
+                ],
+                dormBuildId: [
+                    {required: true, message: "请输入楼宇号数", trigger: "blur"},
                 ],
                 floorNum: [
                     {required: true, message: "请输入楼层数", trigger: "blur"},
                     {pattern: /^[1-3]$/, message: "范围：1-3", trigger: "blur"},
-                ],
-                dormBuildId: [
-                    {required: true, message: "请输入楼宇号数", trigger: "blur"},
-                    {pattern: /^[1-4]$/, message: "范围：1-4", trigger: "blur"},
                 ],
                 maxCapacity: [
                     {required: true, message: "请输入房间可住人数", trigger: "blur"},
@@ -122,11 +122,21 @@ export default {
                 this.disabled = false;
                 this.form = {};
                 this.judge = false;
+                this.form.inputRoom = '';
             });
         },
         save() {
             this.$refs.form.validate(async (valid) => {
                 if (valid) {
+                    // 拼接 dormRoomId
+                    const input = this.form.inputRoom.toString().padStart(3, '0');
+                    const floor = parseInt(input[0]);
+                    const room = parseInt(input.slice(1));
+                    if (floor < 1 || floor > 9 || room < 1 || room > 99) {
+                        ElMessage({ message: '房间号格式错误，楼层1-9，房号01-99', type: 'error' });
+                        return;
+                    }
+                    this.form.dormRoomId = parseInt(this.form.dormBuildId.toString() + input);
                     if (this.judge === false) {
                         //新增
                         request.post("/room/add", this.form).then((res) => {
@@ -182,6 +192,8 @@ export default {
                 this.$refs.form.resetFields();
                 // 生拷贝
                 this.form = JSON.parse(JSON.stringify(row));
+                // 反向拆分 inputRoom
+                this.form.inputRoom = this.form.dormRoomId.toString().slice(-3);
                 this.disabled = true;
             });
         },

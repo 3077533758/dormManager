@@ -28,6 +28,10 @@ public class QuitRoomController {
      */
     @PostMapping("/add")
     public Result<?> add(@RequestBody QuitRoom quitRoom) {
+        // 检查学生是否有未处理的退宿申请
+        if (quitRoomService.hasPendingQuit(quitRoom.getUsername())) {
+            return Result.error("-1", "您有未处理的退宿申请，不能重复申请");
+        }
         // 检查学生是否有宿舍
         DormRoom dormRoom = dormRoomService.judgeHadBed(quitRoom.getUsername());
         if (dormRoom == null) {

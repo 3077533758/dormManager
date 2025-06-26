@@ -7,6 +7,7 @@ import com.example.springboot.entity.StudentCheckin;
 import com.example.springboot.entity.DormBuildDTO;
 import com.example.springboot.entity.DormCompound;
 import com.example.springboot.entity.Student;
+import com.example.springboot.entity.DormBuild;
 import com.example.springboot.service.DormRoomService;
 import com.example.springboot.service.StudentCheckinService;
 import com.example.springboot.service.DormBuildService;
@@ -44,6 +45,8 @@ public class DormRoomController {
         int i = dormRoomService.addNewRoom(dormRoom);
         if (i == 1) {
             return Result.success();
+        } else if (i == -2) {
+            return Result.error("-1", "房间号不合法，格式为楼栋+楼层(1-9)+房号(01-99)");
         } else {
             return Result.error("-1", "添加失败");
         }
@@ -57,6 +60,8 @@ public class DormRoomController {
         int i = dormRoomService.updateNewRoom(dormRoom);
         if (i == 1) {
             return Result.success();
+        } else if (i == -2) {
+            return Result.error("-1", "房间号不合法，格式为楼栋+楼层(1-9)+房号(01-99)");
         } else {
             return Result.error("-1", "更新失败");
         }
@@ -167,7 +172,28 @@ public class DormRoomController {
     public Result<?> getMyRoom(@PathVariable String name) {
         DormRoom dormRoom = dormRoomService.judgeHadBed(name);
         if (dormRoom != null) {
-            return Result.success(dormRoom);
+            Map<String, Object> result = new HashMap<>();
+            result.put("dormRoomId", dormRoom.getDormRoomId());
+            result.put("floorNum", dormRoom.getFloorNum());
+            result.put("maxCapacity", dormRoom.getMaxCapacity());
+            result.put("currentCapacity", dormRoom.getCurrentCapacity());
+            result.put("firstBed", dormRoom.getFirstBed());
+            result.put("secondBed", dormRoom.getSecondBed());
+            result.put("thirdBed", dormRoom.getThirdBed());
+            result.put("fourthBed", dormRoom.getFourthBed());
+            result.put("dormBuildId", dormRoom.getDormBuildId());
+            // 查楼栋
+            DormBuild build = dormBuildService.getById(dormRoom.getDormBuildId());
+            if (build != null) {
+                result.put("dormBuildName", build.getDormBuildName());
+                // 查园区
+                DormCompound compound = dormCompoundService.getById(build.getCompoundId());
+                if (compound != null) {
+                    result.put("compoundName", compound.getCompoundName());
+                    result.put("campusName", compound.getCampus());
+                }
+            }
+            return Result.success(result);
         } else {
             return Result.error("-1", "信息不存在，请联系管理员。");
         }
@@ -454,32 +480,15 @@ public class DormRoomController {
             int maxCapacity = room.getMaxCapacity();
             int currentCapacity = 0;
             String[] bedFields = {room.getFirstBed(), room.getSecondBed(), room.getThirdBed(), room.getFourthBed()};
-            
             for (int i = 1; i <= maxCapacity; i++) {
                 Map<String, Object> bed = new HashMap<>();
                 bed.put("bedNumber", i);
                 String studentUsername = bedFields[i - 1];
-                
-                if (studentUsername != null && !studentUsername.trim().isEmpty()) {
-                    // 查询学生详细信息
-                    Student student = studentService.stuInfo(studentUsername);
-                    if (student != null) {
-                        Map<String, Object> studentInfo = new HashMap<>();
-                        studentInfo.put("username", student.getUsername());
-                        studentInfo.put("name", student.getName());
-                        studentInfo.put("gender", student.getGender());
-                        studentInfo.put("age", student.getAge());
-                        studentInfo.put("phoneNum", student.getPhoneNum());
-                        studentInfo.put("email", student.getEmail());
-                        bed.put("student", studentInfo);
-                        currentCapacity++;
-                    } else {
-                        // 学生信息查询失败，只返回学号
-                        Map<String, Object> studentInfo = new HashMap<>();
-                        studentInfo.put("username", studentUsername);
-                        bed.put("student", studentInfo);
-                        currentCapacity++;
-                    }
+                if (studentUsername != null) {
+                    Map<String, Object> stu = new HashMap<>();
+                    stu.put("username", studentUsername);
+                    bed.put("student", stu);
+                    currentCapacity++;
                 } else {
                     bed.put("student", null);
                 }
@@ -488,14 +497,39 @@ public class DormRoomController {
             
             Map<String, Object> roomInfo = new HashMap<>();
             roomInfo.put("roomId", room.getDormRoomId());
-            roomInfo.put("floorNum", room.getFloorNum());
-            roomInfo.put("maxCapacity", room.getMaxCapacity());
+            roomInfo.put("roomName", room.getDormRoomId());
+            roomInfo.put("maxCapacity", maxCapacity);
             roomInfo.put("currentCapacity", currentCapacity);
             roomInfo.put("beds", beds);
-            
             roomList.add(roomInfo);
         }
         
         return Result.success(roomList);
+    }
+
+    /**
+     * 根据楼栋ID获取房间列表
+     */
+    @GetMapping("/getByBuild")
+    public Result<?> getByBuild(@RequestParam Integer buildId) {
+        List<DormRoom> rooms = dormRoomService.getRoomsByBuild(buildId);
+        if (rooms != null) {
+            return Result.success(rooms);
+        } else {
+            return Result.error("-1", "查询失败");
+        }
+    }
+
+    /**
+     * 根据房间ID获取床位列表
+     */
+    @GetMapping("/getByRoom")
+    public Result<?> getByRoom(@RequestParam Integer roomId) {
+        List<Map<String, Object>> beds = dormRoomService.getBedsByRoom(roomId);
+        if (beds != null) {
+            return Result.success(beds);
+        } else {
+            return Result.error("-1", "查询失败");
+        }
     }
 }

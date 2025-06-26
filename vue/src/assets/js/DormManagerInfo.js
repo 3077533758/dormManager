@@ -63,7 +63,9 @@ export default {
                 email: "",
                 dormbuildId: "",
                 compoundId: null,
-                managerType: "楼栋宿管"
+                managerType: "楼栋宿管",
+                selectedCampus: "",
+                selectedCompoundId: ""
             },
             rules: {
                 username: [
@@ -118,6 +120,9 @@ export default {
             buildings: [],
             compounds: [],
             multipleSelection: [],
+            campusList: [],
+            compoundList: [],
+            buildList: [],
         };
     },
     created() {
@@ -128,6 +133,7 @@ export default {
         }, 1000);
         this.loadBuildings();
         this.loadCompounds();
+        this.loadCampusList();
     },
     methods: {
         async load() {
@@ -158,7 +164,16 @@ export default {
                 if (res.code === '0') {
                     this.compounds = res.data;
                 } else {
-                    this.$message.error("获取围合列表失败: " + res.msg);
+                    this.$message.error("获取园区列表失败: " + res.msg);
+                }
+            });
+        },
+        loadCampusList() {
+            request.get("/compound/getAllCampus").then(res => {
+                if (res.code === '0') {
+                    this.campusList = res.data;
+                } else {
+                    this.$message.error("获取校区列表失败: " + res.msg);
                 }
             });
         },
@@ -166,9 +181,16 @@ export default {
             const building = this.buildings.find(b => b.dormBuildId === buildingId);
             return building ? building.dormBuildName : `${buildingId}号楼`;
         },
+        getBuildingFullPath(buildingId) {
+            const building = this.buildings.find(b => b.dormBuildId === buildingId);
+            if (building) {
+                return `${building.campus || '未知校区'} - ${building.compoundName || '未知园区'} - ${building.dormBuildName}`;
+            }
+            return `${buildingId}号楼`;
+        },
         getCompoundName(compoundId) {
             const compound = this.compounds.find(c => c.compoundId === compoundId);
-            return compound ? compound.compoundName : `${compoundId}围合`;
+            return compound ? compound.compoundName : `${compoundId}园区`;
         },
         showAreaSelector() {
             this.areaSelectorVisible = true;
@@ -220,12 +242,29 @@ export default {
             });
         },
         cancel() {
+            this.dialogVisible = false;
             this.$refs.form.resetFields();
-            this.display = {display: "none"};
-            this.editJudge = true;
+            this.form = {
+                username: "",
+                password: "",
+                name: "",
+                age: "",
+                gender: "",
+                phoneNum: "",
+                email: "",
+                dormbuildId: "",
+                compoundId: null,
+                managerType: "楼栋宿管",
+                selectedCampus: "",
+                selectedCompoundId: ""
+            };
+            this.compoundList = [];
+            this.buildList = [];
+            this.editDisplay = {display: "block"};
             this.disabled = true;
             this.showpassword = true;
-            this.dialogVisible = false;
+            this.display = {display: "none"};
+            this.editJudge = true;
         },
         EditPass() {
             if (this.editJudge) {
@@ -241,33 +280,52 @@ export default {
             }
         },
         handleAdd() {
+            this.judgeAddOrEdit = true;
             this.dialogVisible = true;
             this.$nextTick(() => {
                 this.$refs.form.resetFields();
-                this.judgeAddOrEdit = false;
-                this.editDisplay = {display: "none"};
-                this.disabled = false;
                 this.form = {
-                    password: '123456',
-                    managerType: '楼栋宿管',
-                    gender: '男'
+                    username: "",
+                    password: "",
+                    name: "",
+                    age: "",
+                    gender: "男",
+                    phoneNum: "",
+                    email: "",
+                    dormbuildId: "",
+                    compoundId: null,
+                    managerType: "楼栋宿管",
+                    selectedCampus: "",
+                    selectedCompoundId: ""
                 };
-                this.judge = false;
+                this.compoundList = [];
+                this.buildList = [];
+                this.editDisplay = {display: "block"};
+                this.disabled = false;
+                this.showpassword = true;
+                this.display = {display: "none"};
+                this.editJudge = true;
             });
         },
         handleEdit(row) {
-            //修改
-            //判断操作类型
-            this.judge = true;
-            // 深拷贝
+            this.judgeAddOrEdit = false;
             this.dialogVisible = true;
-            this.$nextTick(() => {
-                this.$refs.form.resetFields();
-                this.form = JSON.parse(JSON.stringify(row));
-                this.judgeAddOrEdit = true;
-                this.editDisplay = {display: "block"};
-                this.disabled = true;
-            });
+            this.form = JSON.parse(JSON.stringify(row));
+            
+            // 根据楼栋ID反推校区和园区信息
+            if (row.dormbuildId) {
+                const building = this.buildings.find(b => b.dormBuildId === row.dormbuildId);
+                if (building) {
+                    this.form.selectedCampus = building.campus;
+                    this.form.selectedCompoundId = building.compoundId;
+                    
+                    // 加载对应的园区和楼栋列表
+                    this.handleCampusChange();
+                    setTimeout(() => {
+                        this.handleCompoundChange();
+                    }, 100);
+                }
+            }
         },
         async handleDelete(username) {
             //删除
@@ -301,6 +359,42 @@ export default {
             // 切换宿管类型时清空管辖区域
             this.form.dormbuildId = null;
             this.form.compoundId = null;
+        },
+        handleCampusChange() {
+            // 清空后续选择
+            this.form.selectedCompoundId = '';
+            this.form.dormbuildId = '';
+            this.compoundList = [];
+            this.buildList = [];
+            
+            if (!this.form.selectedCampus) return;
+            
+            // 根据校区获取园区列表
+            request.get(`/compound/getByCampus/${this.form.selectedCampus}`).then(res => {
+                if (res.code === '0') {
+                    this.compoundList = res.data;
+                } else {
+                    this.$message.error("获取园区列表失败: " + res.msg);
+                }
+            });
+        },
+        handleCompoundChange() {
+            // 清空楼栋选择
+            this.form.dormbuildId = '';
+            this.buildList = [];
+            
+            if (!this.form.selectedCompoundId) return;
+            
+            // 根据园区获取楼栋列表
+            request.get('/building/getByCompound', {
+                params: { compoundId: this.form.selectedCompoundId }
+            }).then(res => {
+                if (res.code === '0') {
+                    this.buildList = res.data;
+                } else {
+                    this.$message.error("获取楼栋列表失败: " + res.msg);
+                }
+            });
         },
     },
 };

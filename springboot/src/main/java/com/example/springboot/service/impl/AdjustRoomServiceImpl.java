@@ -9,6 +9,7 @@ import com.example.springboot.service.AdjustRoomService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustRoom> implements AdjustRoomService {
@@ -54,7 +55,8 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
     public int updateApply(AdjustRoom adjustRoom) {
         // 自动设置处理时间
         if ("通过".equals(adjustRoom.getState()) || "驳回".equals(adjustRoom.getState())) {
-            adjustRoom.setFinishTime(java.time.LocalDateTime.now().toString());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            adjustRoom.setFinishTime(java.time.LocalDateTime.now().format(formatter));
         } else {
             adjustRoom.setFinishTime(null);
         }
@@ -75,6 +77,25 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
         QueryWrapper<AdjustRoom> qw = new QueryWrapper<>();
         qw.eq("username", username).eq("state", "未处理");
         return adjustRoomMapper.selectCount(qw) > 0;
+    }
+
+    @Override
+    public Page findByBuild(Integer pageNum, Integer pageSize, String search, int dormbuildId) {
+        Page page = new Page<>(pageNum, pageSize);
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<AdjustRoom> qw = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        if (search != null && !search.isEmpty()) {
+            qw.like("username", search);
+        }
+        // 通过currentRoomId查dormbuildId
+        // 需要join或in子查询，这里用in实现
+        // 查找所有属于该楼栋的房间号
+        java.util.List<Integer> roomIds = baseMapper.selectRoomIdsByBuildId(dormbuildId);
+        if (roomIds == null || roomIds.isEmpty()) {
+            // 没有房间，返回空
+            return page;
+        }
+        qw.in("currentroom_id", roomIds);
+        return this.page(page, qw);
     }
 
 }

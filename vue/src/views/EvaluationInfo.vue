@@ -27,7 +27,11 @@
 
     <!-- 数据表格 -->
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
-      <el-table-column prop="dormroomId" label="房间号" width="100" />
+      <el-table-column label="房间号">
+        <template #default="scope">
+          {{ scope.row.dormroomId ? scope.row.dormroomId.toString().slice(-3) : '' }}
+        </template>
+      </el-table-column>
       <el-table-column prop="evaluationPeriod" label="评比周期" width="150" />
       <el-table-column prop="hygieneScore" label="卫生总分" width="100" />
       <el-table-column prop="gpaScore" label="绩点均分" width="100" />
@@ -76,8 +80,8 @@
       @close="resetForm"
     >
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
-        <el-form-item label="房间号" prop="dormroomId">
-          <el-input v-model="form.dormroomId" placeholder="请输入房间号" />
+        <el-form-item label="房间号" prop="inputRoom">
+          <el-input v-model="form.inputRoom" maxlength="3" placeholder="如101, 305" />
         </el-form-item>
         <el-form-item label="评比周期" prop="evaluationPeriod">
           <el-input v-model="form.evaluationPeriod" placeholder="例如: 2024年第一学期" />
@@ -125,7 +129,7 @@ export default {
 
     const form = reactive({
       id: null,
-      dormroomId: '',
+      inputRoom: '',
       evaluationPeriod: '',
       hygieneScore: 0,
       gpaScore: 0,
@@ -133,7 +137,7 @@ export default {
     })
 
     const rules = {
-      dormroomId: [{ required: true, message: '请输入房间号', trigger: 'blur' }],
+      inputRoom: [{ required: true, message: '请输入房间号', trigger: 'blur' }],
       evaluationPeriod: [{ required: true, message: '请输入评比周期', trigger: 'blur' }]
     }
 
@@ -190,7 +194,7 @@ export default {
       }
       Object.assign(form, {
         id: null,
-        dormroomId: '',
+        inputRoom: '',
         evaluationPeriod: '',
         hygieneScore: 0,
         gpaScore: 0,

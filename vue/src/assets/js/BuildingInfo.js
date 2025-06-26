@@ -16,7 +16,8 @@ export default {
             pageSize: 10,
             total: 0,
             tableData: [],
-            compoundOptions: [], // 围合选项
+            compoundOptions: [], // 园区选项
+            campusOptions: [], // 校区选项
             form: {
                 dormBuildId: "",
                 dormBuildName: "",
@@ -37,10 +38,10 @@ export default {
                     {required: true, message: "请输入名称", trigger: "blur"},
                 ],
                 campus: [
-                    {required: true, message: "请选择园区", trigger: "change"},
+                    {required: true, message: "请选择校区", trigger: "change"},
                 ],
                 compoundId: [
-                    {required: true, message: "请选择围合", trigger: "change"},
+                    {required: true, message: "请选择园区", trigger: "change"},
                 ],
                 dormBuildDetail: [
                     {required: true, message: "请输入备注", trigger: "blur"},
@@ -50,6 +51,7 @@ export default {
     },
     created() {
         this.load();
+        this.loadCampusOptions();
         this.loading = true;
         setTimeout(() => {
             //设置延迟执行
@@ -89,7 +91,21 @@ export default {
         filterTag(value, row) {
             return row.dormBuildDetail === value;
         },
-        // 加载围合选项
+        // 加载校区选项
+        loadCampusOptions() {
+            request.get("/compound/getAllCampus").then((res) => {
+                if (res.code == 200 || res.code == 0) {
+                    this.campusOptions = res.data;
+                } else {
+                    this.$message.error("获取校区列表失败: " + res.msg);
+                    this.campusOptions = ['东校区', '西校区', '南校区', '北校区'];
+                }
+            }).catch(() => {
+                // 如果请求失败，使用默认值
+                this.campusOptions = ['东校区', '西校区', '南校区', '北校区'];
+            });
+        },
+        // 加载园区选项
         loadCompoundOptions(campus) {
             if (campus) {
                 request.get(`/compound/getByCampus/${campus}`).then((res) => {
@@ -101,9 +117,9 @@ export default {
                 this.compoundOptions = [];
             }
         },
-        // 园区变化时更新围合选项
+        // 校区变化时更新园区选项
         onCampusChange(campus) {
-            this.form.compoundId = ""; // 清空围合选择
+            this.form.compoundId = ""; // 清空园区选择
             this.loadCompoundOptions(campus);
         },
         add() {
@@ -174,7 +190,7 @@ export default {
                 // 深拷贝
                 this.form = JSON.parse(JSON.stringify(row));
                 this.disabled = true;
-                // 加载对应的围合选项
+                // 加载对应的园区选项
                 this.loadCompoundOptions(this.form.campus);
             });
         },

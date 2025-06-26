@@ -27,9 +27,6 @@ public class StudentCheckin {
     @TableField("student_name")
     private String studentName;
     
-    @TableField("action_type")
-    private String actionType;   // 入住/退宿/调宿/请假
-    
     @TableField("action_time")
     private LocalDateTime actionTime;
     

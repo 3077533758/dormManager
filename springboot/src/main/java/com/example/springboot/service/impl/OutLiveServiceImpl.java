@@ -40,7 +40,18 @@ public class OutLiveServiceImpl extends ServiceImpl<OutLiveMapper, OutLive> impl
         Page<OutLive> page = new Page<>(pageNum, pageSize);
         QueryWrapper<OutLive> qw = new QueryWrapper<>();
         qw.like("username", search).or().like("name", search);
-        return outLiveMapper.selectPage(page, qw);
+        Page<OutLive> resultPage = outLiveMapper.selectPage(page, qw);
+        // 补充每条的dormRoomId和dormBuildId
+        for (OutLive outLive : resultPage.getRecords()) {
+            if (outLive.getUsername() != null) {
+                com.example.springboot.entity.DormRoom dormRoom = dormRoomService.judgeHadBed(outLive.getUsername());
+                if (dormRoom != null) {
+                    outLive.setDormRoomId(dormRoom.getDormRoomId());
+                    outLive.setDormBuildId(dormRoom.getDormBuildId());
+                }
+            }
+        }
+        return resultPage;
     }
 
     @Override

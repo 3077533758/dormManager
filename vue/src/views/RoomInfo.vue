@@ -20,7 +20,7 @@
               </el-tooltip>
             </div>
           </div>
-          <!-- 围合选择 -->
+          <!-- 园区选择 -->
           <div style="margin: 10px 0">
             <el-radio-group v-model="selectedCompoundId" @change="handleCompoundChange">
               <el-radio-button v-for="c in compoundList" :key="c.compoundId" :label="c.compoundId">{{ c.compoundName }}</el-radio-button>
@@ -151,7 +151,11 @@
               </el-form>
             </template>
           </el-table-column>
-          <el-table-column label="房间号" prop="dormRoomId" sortable/>
+          <el-table-column label="房间号">
+            <template #default="scope">
+              {{ scope.row.dormRoomId.toString().slice(-3) }}
+            </template>
+          </el-table-column>
           <el-table-column label="楼栋号" prop="dormBuildId" sortable/>
           <el-table-column label="楼层" prop="floorNum" sortable/>
           <el-table-column label="最多可住人数" prop="maxCapacity"/>
@@ -205,8 +209,8 @@
               <el-form-item label="楼层数" prop="floorNum">
                 <el-input v-model.number="form.floorNum" style="width: 80%"></el-input>
               </el-form-item>
-              <el-form-item label="房间号" prop="dormRoomId">
-                <el-input v-model.number="form.dormRoomId" :disabled="disabled" style="width: 80%"></el-input>
+              <el-form-item label="房间号" prop="inputRoom">
+                <el-input v-model="form.inputRoom" maxlength="3" placeholder="如101, 305"></el-input>
               </el-form-item>
               <el-form-item label="最多可住人数" prop="maxCapacity">
                 <el-input v-model.number="form.maxCapacity" style="width: 80%"></el-input>

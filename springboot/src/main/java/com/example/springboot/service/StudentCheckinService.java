@@ -6,5 +6,6 @@ import com.example.springboot.entity.StudentCheckin;
 public interface StudentCheckinService {
     Page<StudentCheckin> findPage(Integer pageNum, Integer pageSize, String search);
     int addStudentCheckin(StudentCheckin studentCheckin);
+    int updateStudentCheckin(StudentCheckin studentCheckin);
     int deleteById(Integer id);
 } 

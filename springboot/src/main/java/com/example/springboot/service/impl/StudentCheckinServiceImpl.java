@@ -47,6 +47,27 @@ public class StudentCheckinServiceImpl implements StudentCheckinService {
         if (student == null) {
             return -1; // 学号不存在
         }
+        
+        // 检查床位是否被占用
+        DormRoom dormRoom = dormRoomService.getById(studentCheckin.getDormroomId());
+        if (dormRoom == null) {
+            return -2; // 房间不存在
+        }
+        
+        // 检查床位是否被占用
+        String occupiedStudent = null;
+        switch (studentCheckin.getBedNumber()) {
+            case 1: occupiedStudent = dormRoom.getFirstBed(); break;
+            case 2: occupiedStudent = dormRoom.getSecondBed(); break;
+            case 3: occupiedStudent = dormRoom.getThirdBed(); break;
+            case 4: occupiedStudent = dormRoom.getFourthBed(); break;
+            default: return -3; // 床位号无效
+        }
+        
+        if (occupiedStudent != null && !occupiedStudent.trim().isEmpty()) {
+            return -4; // 床位已被占用
+        }
+        
         studentCheckin.setStudentName(student.getName());
         studentCheckin.setActionTime(LocalDateTime.now());
         // 自动设置操作人
@@ -62,18 +83,10 @@ public class StudentCheckinServiceImpl implements StudentCheckinService {
         } else {
             studentCheckin.setOperator("系统");
         }
-        // 只有 actionType 为"入住"时才写入寝室信息，否则置空
-        if (!"入住".equals(studentCheckin.getActionType())) {
-            studentCheckin.setDormbuildId(null);
-            studentCheckin.setDormroomId(null);
-            studentCheckin.setBedNumber(null);
-        }
+        
         int result = studentCheckinMapper.insert(studentCheckin);
-        // 新增：同步更新dormroom表
-        if (result > 0 && "入住".equals(studentCheckin.getActionType())) {
-            String bedField = com.example.springboot.common.JudgeBedName.getBedName(studentCheckin.getBedNumber());
-            DormRoom dormRoom = dormRoomService.getById(studentCheckin.getDormroomId());
-            if (dormRoom != null) {
+        // 同步更新dormroom表
+        if (result > 0) {
                 // 设置床位为学号，current_capacity+1
                 switch (studentCheckin.getBedNumber()) {
                     case 1: dormRoom.setFirstBed(studentCheckin.getStudentUsername()); break;
@@ -84,6 +97,66 @@ public class StudentCheckinServiceImpl implements StudentCheckinService {
                 dormRoom.setCurrentCapacity(dormRoom.getCurrentCapacity() + 1);
                 dormRoomService.updateById(dormRoom);
             }
+        return result;
+    }
+
+    @Override
+    public int updateStudentCheckin(StudentCheckin studentCheckin) {
+        // 更新前先查 student 表
+        Student student = studentMapper.selectById(studentCheckin.getStudentUsername());
+        if (student == null) {
+            return -1; // 学号不存在
+        }
+        
+        // 检查床位是否被占用
+        DormRoom dormRoom = dormRoomService.getById(studentCheckin.getDormroomId());
+        if (dormRoom == null) {
+            return -2; // 房间不存在
+        }
+        
+        // 检查床位是否被占用（排除当前学生自己）
+        String occupiedStudent = null;
+        switch (studentCheckin.getBedNumber()) {
+            case 1: occupiedStudent = dormRoom.getFirstBed(); break;
+            case 2: occupiedStudent = dormRoom.getSecondBed(); break;
+            case 3: occupiedStudent = dormRoom.getThirdBed(); break;
+            case 4: occupiedStudent = dormRoom.getFourthBed(); break;
+            default: return -3; // 床位号无效
+        }
+        
+        if (occupiedStudent != null && !occupiedStudent.trim().isEmpty() && 
+            !occupiedStudent.equals(studentCheckin.getStudentUsername())) {
+            return -4; // 床位已被其他学生占用
+        }
+        
+        studentCheckin.setStudentName(student.getName());
+        studentCheckin.setActionTime(LocalDateTime.now());
+        // 自动设置操作人
+        Object userObj = session.getAttribute("User");
+        if (userObj != null) {
+            try {
+                java.lang.reflect.Method getName = userObj.getClass().getMethod("getName");
+                String operator = (String) getName.invoke(userObj);
+                studentCheckin.setOperator(operator);
+            } catch (Exception e) {
+                studentCheckin.setOperator("系统");
+            }
+        } else {
+            studentCheckin.setOperator("系统");
+        }
+        
+        int result = studentCheckinMapper.updateById(studentCheckin);
+        // 同步更新dormroom表
+        if (result > 0) {
+            // 设置床位为学号，current_capacity+1
+            switch (studentCheckin.getBedNumber()) {
+                case 1: dormRoom.setFirstBed(studentCheckin.getStudentUsername()); break;
+                case 2: dormRoom.setSecondBed(studentCheckin.getStudentUsername()); break;
+                case 3: dormRoom.setThirdBed(studentCheckin.getStudentUsername()); break;
+                case 4: dormRoom.setFourthBed(studentCheckin.getStudentUsername()); break;
+            }
+            dormRoom.setCurrentCapacity(dormRoom.getCurrentCapacity() + 1);
+            dormRoomService.updateById(dormRoom);
         }
         return result;
     }

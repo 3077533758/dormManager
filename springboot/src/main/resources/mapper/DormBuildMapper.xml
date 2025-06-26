@@ -10,7 +10,7 @@
             db.dormbuild_name as dormBuildName,
             db.dormbuild_detail as dormBuildDetail,
             db.compound_id as compoundId,
-            db.campus,
+            dc.campus,
             dc.compound_name as compoundName
         FROM dorm_build db
         LEFT JOIN dorm_compound dc ON db.compound_id = dc.compound_id
@@ -18,7 +18,7 @@
             <if test="search != null and search != ''">
                 AND (db.dormbuild_id LIKE CONCAT('%', #{search}, '%') 
                 OR db.dormbuild_name LIKE CONCAT('%', #{search}, '%')
-                OR db.campus LIKE CONCAT('%', #{search}, '%'))
+                OR dc.campus LIKE CONCAT('%', #{search}, '%'))
             </if>
         </where>
         ORDER BY db.dormbuild_id
@@ -32,7 +32,7 @@
             db.dormbuild_name as dormBuildName,
             db.dormbuild_detail as dormBuildDetail,
             db.compound_id as compoundId,
-            db.campus,
+            dc.campus,
             dc.compound_name as compoundName
         FROM dorm_build db
         LEFT JOIN dorm_compound dc ON db.compound_id = dc.compound_id

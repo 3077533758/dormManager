@@ -2,8 +2,7 @@
   <div class="campus-monitor">
     <el-breadcrumb separator-icon="ArrowRight" style="margin: 16px">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>宿舍管理</el-breadcrumb-item>
-      <el-breadcrumb-item>园区监控</el-breadcrumb-item>
+      <el-breadcrumb-item>校区监控</el-breadcrumb-item>
     </el-breadcrumb>
 
     <div class="monitor-container">
@@ -82,7 +81,7 @@
         </el-card>
       </div>
 
-      <!-- 园区详情 -->
+      <!-- 校区详情 -->
       <div class="campus-details">
         <el-row :gutter="20">
           <el-col :span="12" v-for="campus in campusData" :key="campus.campusName">
@@ -96,7 +95,7 @@
                 </div>
               </template>
 
-              <!-- 园区统计 -->
+              <!-- 校区统计 -->
               <div class="campus-stats">
                 <div class="stat-item">
                   <span class="label">楼栋:</span>
@@ -120,9 +119,9 @@
                 </div>
               </div>
 
-              <!-- 围合列表 -->
-              <div class="compounds-section">
-                <h4>围合详情</h4>
+              <!-- 园区列表 -->
+              <div class="compound-list">
+                <h4>园区详情</h4>
                 <el-collapse>
                   <el-collapse-item 
                     v-for="compound in campus.compounds" 
@@ -130,51 +129,36 @@
                     :title="compound.compoundName"
                     :name="compound.compoundId"
                   >
-                    <div class="compound-stats">
-                      <div class="stat-item">
-                        <span class="label">楼栋:</span>
-                        <span class="value">{{ compound.buildings }}栋</span>
+                    <div class="compound-details">
+                      <div class="detail-item">
+                        <span class="label">楼栋数:</span>
+                        <span class="value">{{ compound.buildings }}</span>
                       </div>
-                      <div class="stat-item">
-                        <span class="label">房间:</span>
-                        <span class="value">{{ compound.rooms }}间</span>
+                      <div class="detail-item">
+                        <span class="label">房间数:</span>
+                        <span class="value">{{ compound.rooms }}</span>
                       </div>
-                      <div class="stat-item">
-                        <span class="label">床位:</span>
-                        <span class="value">{{ compound.beds }}个</span>
+                      <div class="detail-item">
+                        <span class="label">床位数:</span>
+                        <span class="value">{{ compound.beds }}</span>
                       </div>
-                      <div class="stat-item">
+                      <div class="detail-item">
                         <span class="label">入住率:</span>
                         <span class="value">{{ compound.occupancyRate }}%</span>
                       </div>
                     </div>
 
                     <!-- 楼栋详情 -->
-                    <div class="buildings-list">
+                    <div class="building-list" v-if="compound.buildList && compound.buildList.length > 0">
+                      <h5>楼栋详情</h5>
                       <el-table :data="compound.buildList" size="small" border>
-                        <el-table-column prop="buildName" label="楼栋" width="80" />
-                        <el-table-column prop="rooms" label="房间数" width="80" />
-                        <el-table-column prop="beds" label="床位数" width="80" />
-                        <el-table-column prop="occupiedBeds" label="已住" width="80" />
-                        <el-table-column prop="availableBeds" label="空床" width="80" />
-                        <el-table-column label="入住率" width="100">
+                        <el-table-column prop="buildName" label="楼栋名称" width="120"/>
+                        <el-table-column prop="rooms" label="房间数" width="80"/>
+                        <el-table-column prop="beds" label="床位数" width="80"/>
+                        <el-table-column prop="occupiedBeds" label="已入住" width="80"/>
+                        <el-table-column prop="occupancyRate" label="入住率" width="100">
                           <template #default="scope">
-                            <el-progress 
-                              :percentage="scope.row.occupancyRate" 
-                              :color="getProgressColor(scope.row.occupancyRate)"
-                              :stroke-width="8"
-                            />
-                          </template>
-                        </el-table-column>
-                        <el-table-column label="操作" width="120">
-                          <template #default="scope">
-                            <el-button 
-                              type="primary" 
-                              size="small" 
-                              @click="showRoomDetails(scope.row)"
-                            >
-                              查看房间
-                            </el-button>
+                            {{ scope.row.occupancyRate }}%
                           </template>
                         </el-table-column>
                       </el-table>
@@ -484,7 +468,7 @@ export default {
   margin-top: 5px;
 }
 
-/* 园区卡片样式 */
+/* 校区卡片样式 */
 .campus-details {
   margin-bottom: 30px;
 }
@@ -550,41 +534,45 @@ export default {
   color: #67C23A;
 }
 
-/* 围合部分样式 */
-.compounds-section {
+/* 园区列表样式 */
+.compound-list {
   margin-top: 20px;
 }
 
-.compounds-section h4 {
-  margin: 0 0 15px 0;
+.compound-list h4 {
+  margin-bottom: 15px;
   color: #303133;
   font-size: 16px;
 }
 
-.compound-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 10px;
-  margin-bottom: 15px;
-  padding: 10px;
-  background: rgba(103, 194, 58, 0.05);
-  border-radius: 8px;
+.compound-details {
+  padding: 10px 0;
 }
 
-.compound-stats .stat-item {
-  font-size: 12px;
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
-.compound-stats .stat-item .label {
-  font-size: 12px;
-}
-
-.compound-stats .stat-item .value {
+.detail-item .label {
+  color: #909399;
   font-size: 14px;
 }
 
-.buildings-list {
+.detail-item .value {
+  color: #303133;
+  font-weight: bold;
+}
+
+.building-list {
   margin-top: 15px;
+}
+
+.building-list h5 {
+  margin-bottom: 10px;
+  color: #606266;
+  font-size: 14px;
 }
 
 /* 刷新按钮样式 */
@@ -618,7 +606,7 @@ export default {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .compound-stats {
+  .compound-details {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -632,7 +620,7 @@ export default {
     grid-template-columns: 1fr;
   }
   
-  .compound-stats {
+  .compound-details {
     grid-template-columns: 1fr;
   }
 }

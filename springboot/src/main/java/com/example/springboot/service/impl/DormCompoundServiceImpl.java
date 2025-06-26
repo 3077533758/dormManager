@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DormCompoundServiceImpl extends ServiceImpl<DormCompoundMapper, DormCompound> implements DormCompoundService {
@@ -79,5 +80,19 @@ public class DormCompoundServiceImpl extends ServiceImpl<DormCompoundMapper, Dor
     public List<DormCompound> getAllCompounds() {
         List<DormCompound> compounds = dormCompoundMapper.selectList(null);
         return compounds;
+    }
+    
+    /**
+     * 获取所有校区
+     */
+    @Override
+    public List<String> getAllCampus() {
+        QueryWrapper<DormCompound> qw = new QueryWrapper<>();
+        qw.select("DISTINCT campus");
+        List<DormCompound> compounds = dormCompoundMapper.selectList(qw);
+        return compounds.stream()
+                .map(DormCompound::getCampus)
+                .distinct()
+                .collect(Collectors.toList());
     }
 } 

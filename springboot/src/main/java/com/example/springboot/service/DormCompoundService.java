@@ -25,4 +25,7 @@ public interface DormCompoundService extends IService<DormCompound> {
 
     //获取所有围合
     List<DormCompound> getAllCompounds();
+    
+    //获取所有校区
+    List<String> getAllCampus();
 } 

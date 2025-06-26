@@ -27,7 +27,11 @@
 
     <!-- 数据表格 -->
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
-      <el-table-column prop="dormroomId" label="房间号" width="100" />
+      <el-table-column label="房间号">
+        <template #default="scope">
+          {{ scope.row.dormroomId ? scope.row.dormroomId.toString().slice(-3) : '' }}
+        </template>
+      </el-table-column>
       <el-table-column prop="studentName" label="学生姓名" width="100" />
       <el-table-column prop="violationType" label="违纪类型" width="120" />
       <el-table-column prop="violationDescription" label="违纪描述" />
@@ -72,8 +76,8 @@
       @close="resetForm"
     >
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
-        <el-form-item label="房间号" prop="dormroomId">
-          <el-input v-model="form.dormroomId" placeholder="请输入房间号" />
+        <el-form-item label="房间号" prop="inputRoom">
+          <el-input v-model="form.inputRoom" maxlength="3" placeholder="如101, 305" />
         </el-form-item>
         <el-form-item label="宿舍楼号" prop="dormbuildId">
           <el-input v-model="form.dormbuildId" placeholder="请输入宿舍楼号" />

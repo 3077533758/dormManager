@@ -25,7 +25,11 @@
         <el-table-column type="index" label="#" width="60"></el-table-column>
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="name" label="姓名"></el-table-column>
-        <el-table-column prop="dormRoomId" label="宿舍号"></el-table-column>
+        <el-table-column prop="dormRoomId" label="宿舍号">
+          <template #default="scope">
+            {{ scope.row.dormRoomId ? scope.row.dormRoomId.toString().slice(-3) : '' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="bedNumber" label="床位号"></el-table-column>
         <el-table-column prop="reason" label="退宿原因"></el-table-column>
         <el-table-column prop="state" label="状态">
@@ -64,7 +68,7 @@
           <el-input v-model="form.name" disabled></el-input>
         </el-form-item>
         <el-form-item label="宿舍号" prop="dormRoomId">
-          <el-input v-model="form.dormRoomId" disabled></el-input>
+          <el-input :value="form.dormRoomId ? form.dormRoomId.toString().slice(-3) : ''" disabled></el-input>
         </el-form-item>
         <el-form-item label="床位号" prop="bedNumber">
           <el-input v-model="form.bedNumber" disabled></el-input>
@@ -91,7 +95,7 @@
           <el-input v-model="form.name" disabled></el-input>
         </el-form-item>
         <el-form-item label="宿舍号">
-          <el-input v-model="form.dormRoomId" disabled></el-input>
+          <el-input :value="(form.dormRoomId !== undefined && form.dormRoomId !== null && form.dormRoomId !== '') ? form.dormRoomId.toString().slice(-3) : '—'" disabled></el-input>
         </el-form-item>
         <el-form-item label="床位号">
           <el-input v-model="form.bedNumber" disabled></el-input>

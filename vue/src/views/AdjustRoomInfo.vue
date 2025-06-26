@@ -7,6 +7,13 @@
     </el-breadcrumb>
     <el-card style="margin: 15px; min-height: calc(100vh - 111px)">
       <div>
+        <!-- 管辖楼栋信息 -->
+        <div class="managed-building-info">
+          <span style="font-size:18px;color:#409EFF;margin-right:8px;">🏢</span>
+          <span style="font-size:16px;font-weight:bold;color:#606266;">
+            当前管辖楼栋：{{ managedBuildingFullName }}
+          </span>
+        </div>
         <!--    功能区-->
         <div style="margin: 10px 0">
           <!--    搜索区-->
@@ -21,9 +28,17 @@
           <el-table-column label="#" type="index"/>
           <el-table-column label="学号" prop="username" sortable width="100px"/>
           <el-table-column label="姓名" prop="name" width="100px"/>
-          <el-table-column label="当前房间号" prop="currentRoomId" sortable/>
+          <el-table-column label="当前房间号" prop="currentRoomId" sortable>
+            <template #default="scope">
+              {{ scope.row.currentRoomId ? scope.row.currentRoomId.toString().slice(-3) : '' }}
+            </template>
+          </el-table-column>
           <el-table-column label="当前床位号" prop="currentBedId" sortable/>
-          <el-table-column label="目标房间号" prop="towardsRoomId" sortable/>
+          <el-table-column label="目标房间号" prop="towardsRoomId" sortable>
+            <template #default="scope">
+              {{ scope.row.towardsRoomId ? scope.row.towardsRoomId.toString().slice(-3) : '' }}
+            </template>
+          </el-table-column>
           <el-table-column label="目标床位号" prop="towardsBedId" sortable/>
           <el-table-column
               :filter-method="filterTag"
@@ -52,13 +67,15 @@
             <template #default="scope">
               <el-button v-if="scope.row.state==='通过' ||scope.row.state==='驳回'" icon="more-filled" type="default"
                          @click="showDetail(scope.row)"></el-button>
-              <el-button v-if="scope.row.state!=='通过' " icon="Edit" type="primary"
+              <el-button v-if="scope.row.state==='未处理'" icon="Edit" type="primary"
                          @click="handleEdit(scope.row)"></el-button>
               <el-popconfirm title="确认删除？" @confirm="handleDelete(scope.row.id)">
                 <template #reference>
                   <el-button icon="Delete" type="danger"></el-button>
                 </template>
               </el-popconfirm>
+              <el-button v-if="scope.row.state==='未处理' && scope.row.username === currentUsername" type="warning" icon="Close"
+                         @click="handleRevoke(scope.row.id, scope.row.username)">撤销</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -86,16 +103,16 @@
                 <el-input v-model="form.name" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item disabled label="当前房间号" prop="currentRoomId">
-                <el-input v-model="form.currentRoomId" disabled style="width: 80%"></el-input>
+                <el-input :value="form.currentRoomId ? form.currentRoomId.toString().slice(-3) : ''" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="当前床位号" prop="currentBedId">
                 <el-input v-model="form.currentBedId" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="目标房间号" prop="towardsRoomId">
-                <el-input v-model="form.towardsRoomId" style="width: 80%"></el-input>
+                <el-input :value="form.towardsRoomId ? form.towardsRoomId.toString().slice(-3) : ''" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="目标床位号" prop="towardsBedId">
-                <el-input v-model="form.towardsBedId" style="width: 80%"></el-input>
+                <el-input v-model="form.towardsBedId" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="申请时间" prop="applyTime" style="margin-top: 27px">
                 <el-date-picker
@@ -114,9 +131,6 @@
                   <el-radio label="驳回">驳回</el-radio>
                   <el-radio label="未处理">未处理</el-radio>
                 </el-radio-group>
-              </el-form-item>
-              <el-form-item label="处理时间" prop="finishTime" style="margin-top: 27px">
-                <el-input v-model="form.finishTime" disabled style="width: 80%"></el-input>
               </el-form-item>
             </el-form>
             <template #footer>
@@ -141,7 +155,7 @@
               </el-form-item>
               <el-form-item label="当前房间号：" prop="currentRoomId">
                 <template #default="scope">
-                  <span>{{ form.currentRoomId }}</span>
+                  <span>{{ form.currentRoomId ? form.currentRoomId.toString().slice(-3) : '' }}</span>
                 </template>
               </el-form-item>
               <el-form-item label="当前床位号：" prop="currentBedId">
@@ -151,7 +165,7 @@
               </el-form-item>
               <el-form-item label="目标房间号：" prop="towardsRoomId">
                 <template #default="scope">
-                  <span>{{ form.towardsRoomId }}</span>
+                  <span>{{ form.towardsRoomId ? form.towardsRoomId.toString().slice(-3) : '' }}</span>
                 </template>
               </el-form-item>
               <el-form-item label="目标床位号：" prop="towardsBedId">
@@ -167,11 +181,6 @@
               <el-form-item label="申请状态：" prop="state">
                 <template #default="scope">
                   <span>{{ form.state }}</span>
-                </template>
-              </el-form-item>
-              <el-form-item label="处理时间：" prop="finishTime">
-                <template #default="scope">
-                  <span>{{ form.finishTime }}</span>
                 </template>
               </el-form-item>
             </el-form>
