@@ -38,4 +38,10 @@ public class OutLive {
 
     @TableField("finish_time")
     private String finishTime;
+
+    @TableField(exist = false)
+    private Integer dormRoomId;
+
+    @TableField(exist = false)
+    private Integer dormBuildId;
 }

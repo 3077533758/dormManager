@@ -12,3 +12,10 @@ body {
     height: 100%;
     background-color: #1398ff;
 }
+
+.managed-building-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}

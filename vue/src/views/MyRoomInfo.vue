@@ -30,12 +30,34 @@
                 <template #label>
                   <div>
                     <el-icon>
-                      <user/>
+                      <location/>
                     </el-icon>
-                    楼宇号
+                    校区
                   </div>
                 </template>
-                <span class="rightSpan">{{ this.room.dormBuildId }}</span>
+                <span class="rightSpan">{{ room.campusName }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div>
+                    <el-icon>
+                      <location/>
+                    </el-icon>
+                    园区
+                  </div>
+                </template>
+                <span class="rightSpan">{{ room.compoundName }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div>
+                    <el-icon>
+                      <user/>
+                    </el-icon>
+                    楼栋
+                  </div>
+                </template>
+                <span class="rightSpan">{{ room.dormBuildName }}</span>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -46,7 +68,7 @@
                     房间号
                   </div>
                 </template>
-                <span class="rightSpan">{{ this.room.dormRoomId }}</span>
+                <span class="rightSpan">{{ room.dormRoomId ? room.dormRoomId.toString().slice(-3) : '' }}</span>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -57,7 +79,7 @@
                     楼层
                   </div>
                 </template>
-                <span class="rightSpan">{{ this.room.floorNum }}</span>
+                <span class="rightSpan">{{ room.floorNum }}</span>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -68,7 +90,7 @@
                     可住人数
                   </div>
                 </template>
-                <span class="rightSpan">{{ this.room.maxCapacity }}</span>
+                <span class="rightSpan">{{ room.maxCapacity }}</span>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -79,7 +101,7 @@
                     已住人数
                   </div>
                 </template>
-                <span class="rightSpan">{{ this.room.currentCapacity }}</span>
+                <span class="rightSpan">{{ room.currentCapacity }}</span>
               </el-descriptions-item>
             </el-descriptions>
           </div>

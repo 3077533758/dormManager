@@ -26,7 +26,11 @@
         <el-table-column label="#" type="index"/>
         <el-table-column :show-overflow-tooltip="true" label="标题" prop="title"/>
         <el-table-column label="宿舍号" prop="dormBuildId" sortable width="150px"/>
-        <el-table-column label="房间号" prop="dormRoomId" sortable width="150px"/>
+        <el-table-column label="房间号">
+          <template #default="scope">
+            {{ scope.row.dormRoomId ? scope.row.dormRoomId.toString().slice(-3) : '' }}
+          </template>
+        </el-table-column>
         <el-table-column label="申请人" prop="repairer" width="150px"/>
         <el-table-column
             :filter-method="filterTag"
@@ -75,7 +79,7 @@
               <el-input v-model="form.dormBuildId" disabled style="width: 80%">{{ this.room.dormBuildId }}</el-input>
             </el-form-item>
             <el-form-item label="房间号" prop="dormRoomId" style="margin-bottom: 27px">
-              <el-input v-model="form.dormRoomId" disabled style="width: 80%">{{ this.room.dormRoomId }}</el-input>
+              <el-input v-model="form.dormRoomId" disabled style="width: 80%">{{ this.room.dormRoomId ? this.room.dormRoomId.toString().slice(-3) : '' }}</el-input>
             </el-form-item>
             <el-form-item label="申请人" prop="repairer">
               <el-input v-model="form.repairer" disabled style="width: 80%">{{ this.name }}</el-input>

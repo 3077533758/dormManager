@@ -23,4 +23,7 @@ public interface AdjustRoomService extends IService<AdjustRoom> {
     // 查询是否有未处理的调宿申请
     boolean hasPendingAdjust(String username);
 
+    // 按楼栋分页查询调宿申请
+    Page findByBuild(Integer pageNum, Integer pageSize, String search, int dormbuildId);
+
 }

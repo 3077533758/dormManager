@@ -100,4 +100,19 @@ public class DormBuildController {
             return Result.error("-1", "查询失败");
         }
     }
+
+    /**
+     * 根据园区ID获取楼栋列表
+     */
+    @GetMapping("/getByCompound")
+    public Result<?> getByCompound(@RequestParam Integer compoundId) {
+        System.out.println("接收到的园区ID: " + compoundId);
+        List<DormBuildDTO> buildings = dormBuildService.getBuildingsByCompound(compoundId);
+        System.out.println("查询到的楼栋数量: " + (buildings != null ? buildings.size() : 0));
+        if (buildings != null) {
+            return Result.success(buildings);
+        } else {
+            return Result.error("-1", "查询失败");
+        }
+    }
 }

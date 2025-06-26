@@ -7,6 +7,12 @@
     </el-breadcrumb>
     <el-card style="margin: 15px; min-height: calc(100vh - 111px)">
       <div>
+        <div class="managed-building-info">
+          <span style="font-size:18px;color:#409EFF;margin-right:8px;">🏢</span>
+          <span style="font-size:16px;font-weight:bold;color:#606266;">
+            当前管辖楼栋：{{ managedBuildingFullName }}
+          </span>
+        </div>
         <!--    功能区-->
         <div style="margin: 10px 0">
           <!--    搜索区-->
@@ -20,7 +26,11 @@
           <el-table-column label="#" type="index"/>
           <el-table-column label="学号" prop="username" sortable width="100px"/>
           <el-table-column label="姓名" prop="name" width="100px"/>
-          <el-table-column label="宿舍号" prop="dormRoomId" sortable/>
+          <el-table-column label="宿舍号" prop="dormRoomId" sortable>
+            <template #default="scope">
+              {{ scope.row.dormRoomId ? scope.row.dormRoomId.toString().slice(-3) : '' }}
+            </template>
+          </el-table-column>
           <el-table-column label="床位号" prop="bedNumber" sortable/>
           <el-table-column label="退宿原因" prop="reason" width="200px"/>
           <el-table-column
@@ -81,10 +91,8 @@
                   <span>{{ form.name }}</span>
                 </template>
               </el-form-item>
-              <el-form-item label="宿舍号：" prop="dormRoomId">
-                <template #default="scope">
-                  <span>{{ form.dormRoomId }}</span>
-                </template>
+              <el-form-item label="宿舍号：" prop="inputRoom">
+                <el-input v-model="form.inputRoom" maxlength="3" placeholder="如101, 305" />
               </el-form-item>
               <el-form-item label="床位号：" prop="bedNumber">
                 <template #default="scope">

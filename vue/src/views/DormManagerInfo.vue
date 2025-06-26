@@ -40,10 +40,10 @@
           <el-table-column label="年龄" prop="age" sortable/>
           <el-table-column label="手机号" prop="phoneNum"/>
           <el-table-column label="邮箱" prop="email"/>
-          <el-table-column label="管辖区域" width="200">
+          <el-table-column label="管辖区域" width="300">
             <template #default="scope">
               <span v-if="scope.row.dormbuildId">
-                {{ getBuildingName(scope.row.dormbuildId) }}
+                {{ getBuildingFullPath(scope.row.dormbuildId) }}
               </span>
               <span v-else class="text-muted">未分配</span>
             </template>
@@ -78,7 +78,7 @@
           <el-dialog v-model="dialogVisible" title="操作" width="30%" @close="cancel">
             <el-form ref="form" :model="form" :rules="rules" label-width="120px">
               <el-form-item label="账号" prop="username">
-                <el-input v-model="form.username" :disabled="judgeAddOrEdit" style="width: 80%"></el-input>
+                <el-input v-model="form.username" :disabled="!judgeAddOrEdit" style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="密码" prop="password">
                 <el-input v-model="form.password" :disabled="disabled" :show-password="showpassword"
@@ -109,10 +109,37 @@
               <el-form-item label="邮箱地址" prop="email">
                 <el-input v-model="form.email" style="width: 80%"></el-input>
               </el-form-item>
-              <el-form-item label="管辖楼栋" prop="dormbuildId">
-                <el-select v-model="form.dormbuildId" placeholder="请选择楼栋">
-                  <el-option v-for="item in buildings" :key="item.dormBuildId" :label="getBuildingName(item.dormBuildId)" :value="item.dormBuildId" />
-                </el-select>
+              <el-form-item label="管辖区域" prop="dormbuildId">
+                <el-form-item label="校区" prop="selectedCampus" style="margin-bottom: 10px;">
+                  <el-select v-model="form.selectedCampus" placeholder="请选择校区" style="width: 100%" @change="handleCampusChange">
+                    <el-option
+                      v-for="campus in campusList"
+                      :key="campus"
+                      :label="campus"
+                      :value="campus"
+                    />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="园区" prop="selectedCompoundId" style="margin-bottom: 10px;">
+                  <el-select v-model="form.selectedCompoundId" placeholder="请选择园区" style="width: 100%" @change="handleCompoundChange" :disabled="!form.selectedCampus">
+                    <el-option
+                      v-for="compound in compoundList"
+                      :key="compound.compoundId"
+                      :label="compound.compoundName"
+                      :value="compound.compoundId"
+                    />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="楼栋" prop="dormbuildId">
+                  <el-select v-model="form.dormbuildId" placeholder="请选择楼栋" style="width: 100%" :disabled="!form.selectedCompoundId">
+                    <el-option
+                      v-for="build in buildList"
+                      :key="build.dormBuildId"
+                      :label="build.dormBuildName"
+                      :value="build.dormBuildId"
+                    />
+                  </el-select>
+                </el-form-item>
               </el-form-item>
             </el-form>
             <template #footer>

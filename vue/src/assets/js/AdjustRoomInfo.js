@@ -24,13 +24,11 @@ export default {
             });
         };
         const checkApplyState = (rule, value, callback) => {
-            console.log(this.form.finishTime)
-            if (value === "通过" && this.form.finishTime !== null) {
-                callback();
-            } else if (value === "驳回" && this.form.finishTime !== null) {
+            // 只要选择了状态就通过
+            if (value === "通过" || value === "驳回" || value === "未处理") {
                 callback();
             } else {
-                callback(new Error("请检查订单完成状态与选择时间是否匹配"));
+                callback(new Error("请选择申请状态"));
             }
         };
         return {
@@ -45,6 +43,10 @@ export default {
             form: {},
             dormRoomId: 0,
             orderState: false,
+            buildings: [], // 所有楼栋（含校区、园区）
+            managedBuildingId: null, // 当前管辖楼栋id
+            managedBuildingFullName: '', // 当前管辖楼栋全称
+            currentUsername: JSON.parse(sessionStorage.getItem('user') || '{}').username,
             rules: {
                 username: [
                     {required: true, message: "请输入学号", trigger: "blur"},
@@ -69,12 +71,31 @@ export default {
     created() {
         this.load();
         this.loading = true;
+        this.loadBuildings();
         setTimeout(() => {
             //设置延迟执行
             this.loading = false;
         }, 1000);
     },
     methods: {
+        async loadBuildings() {
+            // 获取所有楼栋（含校区、园区）
+            request.get('/building/getAllWithCompound').then(res => {
+                if (res.code === '0') {
+                    this.buildings = res.data;
+                    this.updateManagedBuildingFullName();
+                }
+            });
+        },
+        updateManagedBuildingFullName() {
+            if (!this.managedBuildingId || !this.buildings.length) return;
+            const building = this.buildings.find(b => b.dormBuildId === this.managedBuildingId);
+            if (building) {
+                this.managedBuildingFullName = `${building.campus || '未知校区'}-${building.compoundName || '未知园区'}-${building.dormBuildName}`;
+            } else {
+                this.managedBuildingFullName = this.managedBuildingId + '号楼';
+            }
+        },
         async load() {
             request.get("/adjustRoom/find", {
                 params: {
@@ -87,6 +108,15 @@ export default {
                 this.tableData = res.data.records;
                 this.total = res.data.total;
                 this.loading = false;
+                // 自动获取管辖楼栋id（取第一页第一条数据的dormBuildId）
+                if (this.tableData.length && this.tableData[0].currentRoomId) {
+                    // 假设currentRoomId前几位为楼栋id
+                    const rid = this.tableData[0].currentRoomId;
+                    // 取楼栋id（如1101->1，2102->2，需根据实际编码规则调整）
+                    // 这里假设楼栋id为rid的前1位
+                    this.managedBuildingId = parseInt(rid.toString().substring(0, rid.toString().length - 3));
+                    this.updateManagedBuildingFullName();
+                }
             });
         },
         reset() {
@@ -126,14 +156,6 @@ export default {
                             ElMessage({
                                 message: "修改成功",
                                 type: "success",
-                            });
-                            this.search = "";
-                            this.load();
-                            this.dialogVisible = false;
-                        } else if (res.msg === "重复操作") {
-                            ElMessage({
-                                message: res.msg,
-                                type: "error",
                             });
                             this.search = "";
                             this.load();
@@ -197,6 +219,24 @@ export default {
             //改变页码
             this.currentPage = pageNum;
             this.load();
+        },
+        async handleRevoke(id, username) {
+            // 撤销调宿申请
+            request.delete(`/adjustRoom/studentDelete/${id}/${username}`).then((res) => {
+                if (res.code === "0") {
+                    ElMessage({
+                        message: "撤销成功",
+                        type: "success",
+                    });
+                    this.search = "";
+                    this.load();
+                } else {
+                    ElMessage({
+                        message: res.msg,
+                        type: "error",
+                    });
+                }
+            });
         },
     },
 }

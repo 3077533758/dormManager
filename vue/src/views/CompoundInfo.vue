@@ -2,8 +2,7 @@
   <div>
     <el-breadcrumb replace="true" separator-icon="ArrowRight" style="margin: 16px">
       <el-breadcrumb-item :to="{ path: 'home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>宿舍管理</el-breadcrumb-item>
-      <el-breadcrumb-item>围合信息</el-breadcrumb-item>
+      <el-breadcrumb-item>园区信息</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card style="margin: 15px; min-height: calc(100vh - 111px)">
       <div>
@@ -11,9 +10,9 @@
         <div style="margin: 10px 0">
           <!--    搜索区-->
           <div style="margin: 10px 0">
-            <el-input v-model="search" clearable placeholder="请输入围合名称或园区" prefix-icon="Search" style="width: 20%"/>
-            <el-button icon="Search" style="margin-left: 5px" type="primary" @click="load"></el-button>
-            <el-button icon="refresh-left" style="margin-left: 10px" type="default" @click="reset"></el-button>
+            <el-input v-model="search" clearable placeholder="请输入园区名称或校区" prefix-icon="Search" style="width: 20%"/>
+            <el-button type="primary" style="margin-left: 5px" @click="load">查询</el-button>
+            <el-button type="warning" style="margin-left: 5px" @click="reset">重置</el-button>
             <div style="float: right">
               <el-tooltip content="添加" placement="top">
                 <el-button icon="plus" style="width: 50px" type="primary" @click="add"></el-button>
@@ -25,9 +24,9 @@
         <el-table v-loading="loading" :data="tableData" border max-height="705" show-overflow-tooltip
                   style="width: 100%">
           <el-table-column label="#" type="index"/>
-          <el-table-column label="围合ID" prop="compoundId" sortable/>
-          <el-table-column label="围合名称" prop="compoundName"/>
-          <el-table-column label="所属园区" prop="campus"/>
+          <!-- <el-table-column label="园区ID" prop="compoundId" sortable/> -->
+          <el-table-column label="园区名称" prop="compoundName"/>
+          <el-table-column label="所属校区" prop="campus"/>
           <el-table-column label="备注" prop="compoundDetail"/>
           <!--      操作栏-->
           <el-table-column label="操作" width="130px">
@@ -59,15 +58,12 @@
         <div>
           <el-dialog v-model="dialogVisible" title="操作" width="30%" @close="cancel">
             <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-              <el-form-item label="围合名称" prop="compoundName">
+              <el-form-item label="园区名称" prop="compoundName">
                 <el-input v-model="form.compoundName" style="width: 80%"></el-input>
               </el-form-item>
-              <el-form-item label="所属园区" prop="campus">
-                <el-select v-model="form.campus" placeholder="请选择园区" style="width: 80%">
-                  <el-option label="东园" value="东园"></el-option>
-                  <el-option label="西园" value="西园"></el-option>
-                  <el-option label="南园" value="南园"></el-option>
-                  <el-option label="北园" value="北园"></el-option>
+              <el-form-item label="所属校区" prop="campus">
+                <el-select v-model="form.campus" placeholder="请选择校区" style="width: 80%">
+                  <el-option v-for="item in campusOptions" :key="item" :label="item" :value="item"/>
                 </el-select>
               </el-form-item>
               <el-form-item label="备注" prop="compoundDetail">

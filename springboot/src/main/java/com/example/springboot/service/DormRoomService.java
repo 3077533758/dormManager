@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.springboot.entity.AdjustRoom;
 import com.example.springboot.entity.DormRoom;
 
+import java.util.List;
 
 public interface DormRoomService extends IService<DormRoom> {
     //统计没有住满的宿舍数量
@@ -45,4 +46,10 @@ public interface DormRoomService extends IService<DormRoom> {
 
     // 检查床位是否有人
     DormRoom checkBedState(Integer dormRoomId, int bedNum);
+
+    // 根据楼栋ID获取房间列表
+    List<DormRoom> getRoomsByBuild(Integer buildId);
+
+    // 根据房间ID获取床位列表
+    List<java.util.Map<String, Object>> getBedsByRoom(Integer roomId);
 }

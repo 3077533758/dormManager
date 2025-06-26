@@ -12,13 +12,34 @@ export default {
             total: 0,
             detailDialog: false,
             tableData: [],
-            form: {}
+            form: {},
+            buildings: [], // 所有楼栋（含校区、园区）
+            managedBuildingId: null, // 当前管辖楼栋id
+            managedBuildingFullName: '' // 当前管辖楼栋全称
         }
     },
     created() {
-        this.load()
+        this.load();
+        this.loadBuildings();
     },
     methods: {
+        loadBuildings() {
+            request.get('/building/getAllWithCompound').then(res => {
+                if (res.code === '0') {
+                    this.buildings = res.data;
+                    this.updateManagedBuildingFullName();
+                }
+            });
+        },
+        updateManagedBuildingFullName() {
+            if (!this.managedBuildingId || !this.buildings.length) return;
+            const building = this.buildings.find(b => b.dormBuildId === this.managedBuildingId);
+            if (building) {
+                this.managedBuildingFullName = `${building.campus || '未知校区'}·${building.compoundName || '未知园区'}·${building.dormBuildName}`;
+            } else {
+                this.managedBuildingFullName = this.managedBuildingId + '号楼';
+            }
+        },
         load() {
             this.loading = true
             request.get("/outLive/find", {
@@ -31,6 +52,12 @@ export default {
                 this.loading = false
                 this.tableData = res.data.records
                 this.total = res.data.total
+                // 自动获取管辖楼栋id（取第一页第一条数据的dormRoomId）
+                if (this.tableData.length && this.tableData[0].dormRoomId) {
+                    const rid = this.tableData[0].dormRoomId;
+                    this.managedBuildingId = parseInt(rid.toString().substring(0, rid.toString().length - 3));
+                    this.updateManagedBuildingFullName();
+                }
             })
         },
         showDetail(row) {

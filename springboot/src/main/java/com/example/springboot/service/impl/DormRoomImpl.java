@@ -15,6 +15,10 @@ import javax.annotation.Resource;
 
 import static com.example.springboot.common.CalPeopleNum.calNum;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class DormRoomImpl extends ServiceImpl<DormRoomMapper, DormRoom> implements DormRoomService {
@@ -38,6 +42,9 @@ public class DormRoomImpl extends ServiceImpl<DormRoomMapper, DormRoom> implemen
      */
     @Override
     public int addNewRoom(DormRoom dormRoom) {
+        if (!isValidRoomId(dormRoom.getDormRoomId())) {
+            return -2;
+        }
         int insert = dormRoomMapper.insert(dormRoom);
         return insert;
     }
@@ -59,6 +66,9 @@ public class DormRoomImpl extends ServiceImpl<DormRoomMapper, DormRoom> implemen
      */
     @Override
     public int updateNewRoom(DormRoom dormRoom) {
+        if (!isValidRoomId(dormRoom.getDormRoomId())) {
+            return -2;
+        }
         int i = dormRoomMapper.updateById(dormRoom);
         return i;
     }
@@ -172,29 +182,52 @@ public class DormRoomImpl extends ServiceImpl<DormRoomMapper, DormRoom> implemen
         String currentBedName = JudgeBedName.getBedName(adjustRoom.getCurrentBedId());
         //目标房间号
         int towardsRoomId = adjustRoom.getTowardsRoomId();
-        //目标目标房间号
+        //目标床位名称
         String towardsBedName = JudgeBedName.getBedName(adjustRoom.getTowardsBedId());
 
+        // 1. 检查当前房间和床位是否存在
         QueryWrapper qw = new QueryWrapper();
         qw.eq("dormroom_id", currentRoomId);
         qw.isNotNull(currentBedName);
         DormRoom dormRoom1 = dormRoomMapper.selectOne(qw);
 
         if (dormRoom1 == null) {
-            return -2;
+            return -2; // 当前床位不存在
         }
-        int currentCapacity1 = calNum(dormRoom1);
+        
+        // 2. 检查目标房间是否存在
+        DormRoom dormRoom2 = dormRoomMapper.selectById(towardsRoomId);
+        if (dormRoom2 == null) {
+            return -3; // 目标房间不存在
+        }
+        
+        // 3. 检查目标床位是否为空
+        String targetBedStudent = null;
+        switch (adjustRoom.getTowardsBedId()) {
+            case 1: targetBedStudent = dormRoom2.getFirstBed(); break;
+            case 2: targetBedStudent = dormRoom2.getSecondBed(); break;
+            case 3: targetBedStudent = dormRoom2.getThirdBed(); break;
+            case 4: targetBedStudent = dormRoom2.getFourthBed(); break;
+            default: return -4; // 目标床位号无效
+        }
+        
+        if (targetBedStudent != null && !targetBedStudent.trim().isEmpty()) {
+            return -5; // 目标床位已被占用
+        }
 
+        int currentCapacity1 = calNum(dormRoom1);
+        int currentCapacity2 = calNum(dormRoom2);
+
+        // 4. 执行调宿操作
+        // 4.1 清空当前床位
         UpdateWrapper uw1 = new UpdateWrapper();
         uw1.eq("dormroom_id", currentRoomId);
         uw1.set(currentBedName, null);
         uw1.set("current_capacity", currentCapacity1 - 1);
         int result1 = dormRoomMapper.update(null, uw1);
 
-        DormRoom dormRoom2 = dormRoomMapper.selectById(towardsRoomId);
-        int currentCapacity2 = calNum(dormRoom2);
-
         if (result1 == 1) {
+            // 4.2 设置目标床位
             UpdateWrapper uw2 = new UpdateWrapper();
             uw2.eq("dormroom_id", towardsRoomId);
             uw2.set(towardsBedName, username);
@@ -240,5 +273,51 @@ public class DormRoomImpl extends ServiceImpl<DormRoomMapper, DormRoom> implemen
         return dormRoom;
     }
 
+    private boolean isValidRoomId(Integer roomId) {
+        if (roomId == null) return false;
+        String idStr = roomId.toString();
+        if (idStr.length() < 4) return false;
+        String last3 = idStr.substring(idStr.length() - 3);
+        int floor = Integer.parseInt(last3.substring(0, 1));
+        int room = Integer.parseInt(last3.substring(1));
+        if (floor < 1 || floor > 9 || room < 1 || room > 99) return false;
+        return true;
+    }
+
+    /**
+     * 根据楼栋ID获取房间列表
+     */
+    @Override
+    public List<DormRoom> getRoomsByBuild(Integer buildId) {
+        QueryWrapper<DormRoom> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("dormbuild_id", buildId);
+        queryWrapper.orderByAsc("dormroom_id");
+        return dormRoomMapper.selectList(queryWrapper);
+    }
+
+    /**
+     * 根据房间ID获取床位列表
+     */
+    @Override
+    public List<Map<String, Object>> getBedsByRoom(Integer roomId) {
+        DormRoom room = dormRoomMapper.selectById(roomId);
+        if (room == null) {
+            return null;
+        }
+
+        List<Map<String, Object>> beds = new ArrayList<>();
+        int maxCapacity = room.getMaxCapacity();
+        String[] bedFields = {room.getFirstBed(), room.getSecondBed(), room.getThirdBed(), room.getFourthBed()};
+
+        for (int i = 1; i <= maxCapacity; i++) {
+            Map<String, Object> bed = new HashMap<>();
+            bed.put("bedNumber", i);
+            String studentUsername = bedFields[i - 1];
+            bed.put("occupied", studentUsername != null && !studentUsername.trim().isEmpty());
+            beds.add(bed);
+        }
+
+        return beds;
+    }
 
 }

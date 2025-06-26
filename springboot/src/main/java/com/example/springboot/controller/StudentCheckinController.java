@@ -26,7 +26,37 @@ public class StudentCheckinController {
     @PostMapping("/add")
     public Result<?> add(@RequestBody StudentCheckin studentCheckin) {
         int result = studentCheckinService.addStudentCheckin(studentCheckin);
-        return result > 0 ? Result.success() : Result.error("-1", "添加失败或学号不存在");
+        if (result > 0) {
+            return Result.success();
+        } else if (result == -1) {
+            return Result.error("-1", "学号不存在");
+        } else if (result == -2) {
+            return Result.error("-1", "房间不存在");
+        } else if (result == -3) {
+            return Result.error("-1", "床位号无效");
+        } else if (result == -4) {
+            return Result.error("-1", "床位已被占用");
+        } else {
+            return Result.error("-1", "添加失败");
+        }
+    }
+
+    @PutMapping("/update")
+    public Result<?> update(@RequestBody StudentCheckin studentCheckin) {
+        int result = studentCheckinService.updateStudentCheckin(studentCheckin);
+        if (result > 0) {
+            return Result.success();
+        } else if (result == -1) {
+            return Result.error("-1", "学号不存在");
+        } else if (result == -2) {
+            return Result.error("-1", "房间不存在");
+        } else if (result == -3) {
+            return Result.error("-1", "床位号无效");
+        } else if (result == -4) {
+            return Result.error("-1", "床位已被其他学生占用");
+        } else {
+            return Result.error("-1", "更新失败");
+        }
     }
 
     @DeleteMapping("/delete/{id}")

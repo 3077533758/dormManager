@@ -29,4 +29,7 @@ public interface DormBuildService extends IService<DormBuild> {
 
     //获取所有楼栋信息（包含围合信息）
     List<DormBuildDTO> getAllBuildingsWithCompound();
+
+    //根据园区ID获取楼栋列表
+    List<DormBuildDTO> getBuildingsByCompound(Integer compoundId);
 }

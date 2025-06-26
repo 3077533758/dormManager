@@ -95,4 +95,17 @@ public class DormCompoundController {
             return Result.error("-1", "查询失败");
         }
     }
+
+    /**
+     * 获取所有校区
+     */
+    @GetMapping("/getAllCampus")
+    public Result<?> getAllCampus() {
+        List<String> campusList = dormCompoundService.getAllCampus();
+        if (campusList != null) {
+            return Result.success(campusList);
+        } else {
+            return Result.error("-1", "查询失败");
+        }
+    }
 } 

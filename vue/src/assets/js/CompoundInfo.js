@@ -21,12 +21,13 @@ export default {
                 campus: "",
                 compoundDetail: "",
             },
+            campusOptions: [],
             rules: {
                 compoundName: [
-                    {required: true, message: "请输入围合名称", trigger: "blur"},
+                    {required: true, message: "请输入园区名称", trigger: "blur"},
                 ],
                 campus: [
-                    {required: true, message: "请选择园区", trigger: "change"},
+                    {required: true, message: "请选择校区", trigger: "change"},
                 ],
                 compoundDetail: [
                     {required: true, message: "请输入备注", trigger: "blur"},
@@ -36,6 +37,7 @@ export default {
     },
     created() {
         this.load();
+        this.loadCampusOptions();
         this.loading = true;
         setTimeout(() => {
             //设置延迟执行
@@ -59,18 +61,7 @@ export default {
         },
         reset() {
             this.search = ''
-            request.get("/compound/find", {
-                params: {
-                    pageNum: 1,
-                    pageSize: this.pageSize,
-                    search: this.search,
-                },
-            }).then((res) => {
-                console.log(res);
-                this.tableData = res.data.records;
-                this.total = res.data.total;
-                this.loading = false;
-            });
+            this.load();
         },
         add() {
             this.dialogVisible = true;
@@ -168,6 +159,20 @@ export default {
             //改变页码
             this.currentPage = pageNum;
             this.load();
+        },
+        loadCampusOptions() {
+            // 从后端获取校区列表
+            request.get("/compound/getAllCampus").then((res) => {
+                if (res.code == 200 || res.code == 0) {
+                    this.campusOptions = res.data;
+                } else {
+                    this.$message.error("获取校区列表失败: " + res.msg);
+                    this.campusOptions = ['东校区', '西校区', '南校区', '北校区'];
+                }
+            }).catch(() => {
+                // 如果请求失败，使用默认值
+                this.campusOptions = ['东校区', '西校区', '南校区', '北校区'];
+            });
         },
     },
 }; 

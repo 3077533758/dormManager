@@ -27,10 +27,10 @@
         </el-icon>
         <span>宿舍管理</span>
       </template>
-      <el-menu-item v-if="this.judgeIdentity() !== 0" index="/compoundInfo">围合信息</el-menu-item>
+      <el-menu-item v-if="this.judgeIdentity() !== 0" index="/compoundInfo">园区信息</el-menu-item>
       <el-menu-item v-if="this.judgeIdentity() !== 0" index="/buildingInfo">楼宇信息</el-menu-item>
       <el-menu-item v-if="this.judgeIdentity() !== 0" index="/roomInfo">房间信息</el-menu-item>
-      <el-menu-item v-if="this.judgeIdentity() !== 0" index="/campusMonitor">园区监控</el-menu-item>
+      <el-menu-item v-if="this.judgeIdentity() !== 0" index="/campusMonitor">校区监控</el-menu-item>
     </el-sub-menu>
     <el-sub-menu v-if="this.judgeIdentity() !== 0" index="4">
       <template #title>

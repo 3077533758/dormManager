@@ -71,8 +71,15 @@ export default {
                 return
             }
             const user = JSON.parse(sessionStorage.getItem("user"))
-            // 新增：校验未处理调宿申请
+            // 校验未处理调宿和退宿申请
             request.get(`/stu/apply-status/${user.username}`).then((res) => {
+                if (res.data.hasPendingQuit) {
+                    ElMessage({
+                        message: "您有未处理的退宿申请，不能再提交退宿申请！",
+                        type: "warning"
+                    })
+                    return
+                }
                 if (res.data.hasPendingAdjust) {
                     ElMessage({
                         message: "您有未处理的调宿申请，不能再提交退宿申请！",
@@ -85,11 +92,12 @@ export default {
                     this.$refs.form.resetFields()
                     this.form.username = user.username
                     this.form.name = user.name
-                    // 获取学生当前宿舍信息
+                    // 获取学生当前宿舍信息，优先用 currentRoomId
                     request.get("/room/getMyRoom/" + user.username).then((res) => {
                         if (res.code === "0") {
-                            this.form.dormRoomId = res.data.dormRoomId
+                            this.form.dormRoomId = res.data.currentRoomId || res.data.dormRoomId
                             this.form.bedNumber = this.calBedNum(user.username, res.data)
+                            this.form.dormBuildId = res.data.dormBuildId
                         }
                     })
                 })
@@ -98,6 +106,11 @@ export default {
         save() {
             this.$refs.form.validate((valid) => {
                 if (valid) {
+                    // 拼接完整宿舍号
+                    if (this.form.dormBuildId && this.form.dormRoomId) {
+                        const last3 = this.form.dormRoomId.toString().slice(-3)
+                        this.form.dormRoomId = Number(this.form.dormBuildId.toString() + last3.padStart(3, '0'))
+                    }
                     request.post("/quitRoom/add", this.form).then((res) => {
                         if (res.code === "0") {
                             ElMessage({
@@ -120,6 +133,7 @@ export default {
             this.detailDialog = true
             this.$nextTick(() => {
                 this.form = JSON.parse(JSON.stringify(row))
+                // 只用表格里的 dormRoomId，不再兜底查当前宿舍
             })
         },
         cancel() {

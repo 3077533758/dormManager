@@ -2,7 +2,7 @@
   <div>
     <el-breadcrumb replace="true" separator-icon="ArrowRight" style="margin: 16px">
       <el-breadcrumb-item :to="{ path: 'home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>宿舍管理</el-breadcrumb-item>
+      <el-breadcrumb-item>楼栋信息</el-breadcrumb-item>
       <el-breadcrumb-item>楼宇信息</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card style="margin: 15px; min-height: calc(100vh - 111px)">
@@ -27,8 +27,8 @@
           <el-table-column label="#" type="index"/>
           <el-table-column label="编号" prop="dormBuildId" sortable/>
           <el-table-column label="名称" prop="dormBuildName"/>
-          <el-table-column label="园区" prop="campus"/>
-          <el-table-column label="围合" prop="compoundName"/>
+          <el-table-column label="校区" prop="campus"/>
+          <el-table-column label="园区" prop="compoundName"/>
           <el-table-column
               :filter-method="filterTag"
               :filters="[
@@ -75,16 +75,13 @@
               <el-form-item label="名称" prop="dormBuildName">
                 <el-input v-model="form.dormBuildName" style="width: 80%"></el-input>
               </el-form-item>
-              <el-form-item label="园区" prop="campus">
-                <el-select v-model="form.campus" placeholder="请选择园区" style="width: 80%" @change="onCampusChange">
-                  <el-option label="东园" value="东园"></el-option>
-                  <el-option label="西园" value="西园"></el-option>
-                  <el-option label="南园" value="南园"></el-option>
-                  <el-option label="北园" value="北园"></el-option>
+              <el-form-item label="校区" prop="campus">
+                <el-select v-model="form.campus" placeholder="请选择校区" style="width: 80%" @change="onCampusChange">
+                  <el-option v-for="item in campusOptions" :key="item" :label="item" :value="item"/>
                 </el-select>
               </el-form-item>
-              <el-form-item label="围合" prop="compoundId">
-                <el-select v-model="form.compoundId" placeholder="请选择围合" style="width: 80%">
+              <el-form-item label="园区" prop="compoundId">
+                <el-select v-model="form.compoundId" placeholder="请选择园区" style="width: 80%">
                   <el-option 
                     v-for="compound in compoundOptions" 
                     :key="compound.compoundId" 

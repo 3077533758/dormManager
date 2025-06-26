@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -90,6 +91,43 @@ public class DormBuildImpl extends ServiceImpl<DormBuildMapper, DormBuild> imple
     public List<DormBuildDTO> getAllBuildingsWithCompound() {
         List<DormBuildDTO> buildings = dormBuildMapper.selectListWithCompound();
         return buildings;
+    }
+
+    /**
+     * 根据园区ID获取楼栋列表
+     */
+    @Override
+    public List<DormBuildDTO> getBuildingsByCompound(Integer compoundId) {
+        System.out.println("Service层接收到的园区ID: " + compoundId);
+        System.out.println("园区ID类型: " + (compoundId != null ? compoundId.getClass().getName() : "null"));
+        
+        QueryWrapper<DormBuild> qw = new QueryWrapper<>();
+        qw.eq("compound_id", compoundId);
+        System.out.println("查询条件: compound_id = " + compoundId);
+        
+        List<DormBuild> buildings = dormBuildMapper.selectList(qw);
+        System.out.println("数据库查询到的楼栋数量: " + buildings.size());
+        
+        // 打印查询到的楼栋信息
+        for (DormBuild building : buildings) {
+            System.out.println("楼栋ID: " + building.getDormBuildId() + 
+                             ", 楼栋名: " + building.getDormBuildName() + 
+                             ", 园区ID: " + building.getCompoundId());
+        }
+        
+        // 转换为 DormBuildDTO
+        List<DormBuildDTO> result = buildings.stream().map(building -> {
+            DormBuildDTO dto = new DormBuildDTO();
+            dto.setId(building.getId());
+            dto.setDormBuildId(building.getDormBuildId());
+            dto.setDormBuildName(building.getDormBuildName());
+            dto.setDormBuildDetail(building.getDormBuildDetail());
+            dto.setCompoundId(building.getCompoundId());
+            return dto;
+        }).collect(Collectors.toList());
+        
+        System.out.println("转换后的DTO数量: " + result.size());
+        return result;
     }
 
 }
