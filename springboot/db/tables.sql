@@ -85,7 +85,6 @@ CREATE TABLE `student_checkin` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
   `student_username` varchar(255) NOT NULL COMMENT '学生学号',
   `student_name` varchar(255) NOT NULL COMMENT '学生姓名',
-  --`action_type` varchar(32)DEFAULT'普通入住' NOT NULL COMMENT '操作类型（入住/退宿/调宿/请假）',
   `action_time` datetime NOT NULL COMMENT '操作时间',
   `dormbuild_id` int DEFAULT NULL COMMENT '宿舍楼号',
   `dormroom_id` int DEFAULT NULL COMMENT '房间号',
