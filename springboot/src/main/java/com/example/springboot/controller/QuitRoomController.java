@@ -90,8 +90,34 @@ public class QuitRoomController {
     @GetMapping("/find")
     public Result<?> findPage(@RequestParam(defaultValue = "1") Integer pageNum,
                               @RequestParam(defaultValue = "10") Integer pageSize,
-                              @RequestParam(defaultValue = "") String search) {
-        Page page = quitRoomService.find(pageNum, pageSize, search);
+                              @RequestParam(defaultValue = "") String search,
+                              javax.servlet.http.HttpSession session) {
+        // 获取用户身份和权限控制
+        Object userObj = session.getAttribute("User");
+        Object identityObj = session.getAttribute("Identity");
+        
+        if (userObj == null || identityObj == null) {
+            return Result.error("-1", "无权限");
+        }
+        
+        String identity = identityObj.toString();
+        Page page;
+        
+        if ("admin".equals(identity)) {
+            // 管理员可以看到所有申请
+            page = quitRoomService.find(pageNum, pageSize, search);
+        } else if ("dormManager".equals(identity)) {
+            // 宿管只能看到自己楼栋的申请
+            if (!(userObj instanceof com.example.springboot.entity.DormManager)) {
+                return Result.error("-1", "无权限");
+            }
+            com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
+            int dormbuildId = manager.getDormbuildId();
+            page = quitRoomService.findByBuild(pageNum, pageSize, search, dormbuildId);
+        } else {
+            return Result.error("-1", "无权限");
+        }
+        
         return page != null ? Result.success(page) : Result.error("-1", "查询失败");
     }
 

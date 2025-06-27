@@ -8,7 +8,7 @@
     <el-card style="margin: 15px; min-height: calc(100vh - 111px)">
       <div>
         <!-- 管辖楼栋信息 -->
-        <div class="managed-building-info">
+        <div v-if="showManagedBuilding" class="managed-building-info">
           <span style="font-size:18px;color:#409EFF;margin-right:8px;">🏢</span>
           <span style="font-size:16px;font-weight:bold;color:#606266;">
             当前管辖楼栋：{{ managedBuildingFullName }}

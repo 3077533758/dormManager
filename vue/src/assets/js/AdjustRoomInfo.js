@@ -47,6 +47,8 @@ export default {
             managedBuildingId: null, // 当前管辖楼栋id
             managedBuildingFullName: '', // 当前管辖楼栋全称
             currentUsername: JSON.parse(sessionStorage.getItem('user') || '{}').username,
+            currentIdentity: JSON.parse(sessionStorage.getItem('identity') || '""'), // 当前用户身份
+            showManagedBuilding: false, // 是否显示管辖楼栋信息
             rules: {
                 username: [
                     {required: true, message: "请输入学号", trigger: "blur"},
@@ -71,7 +73,11 @@ export default {
     created() {
         this.load();
         this.loading = true;
-        this.loadBuildings();
+        // 只有宿管才显示管辖楼栋信息
+        if (this.currentIdentity === 'dormManager') {
+            this.showManagedBuilding = true;
+            this.loadBuildings();
+        }
         setTimeout(() => {
             //设置延迟执行
             this.loading = false;
@@ -108,8 +114,8 @@ export default {
                 this.tableData = res.data.records;
                 this.total = res.data.total;
                 this.loading = false;
-                // 自动获取管辖楼栋id（取第一页第一条数据的dormBuildId）
-                if (this.tableData.length && this.tableData[0].currentRoomId) {
+                // 只有宿管才自动获取管辖楼栋id
+                if (this.showManagedBuilding && this.tableData.length && this.tableData[0].currentRoomId) {
                     // 假设currentRoomId前几位为楼栋id
                     const rid = this.tableData[0].currentRoomId;
                     // 取楼栋id（如1101->1，2102->2，需根据实际编码规则调整）

@@ -52,16 +52,52 @@ public class AdjustRoomController {
     @PutMapping("/update/{state}")
     public Result<?> update(@RequestBody AdjustRoom adjustRoom, @PathVariable Boolean state, javax.servlet.http.HttpSession session) {
         Object userObj = session.getAttribute("User");
-        if (userObj == null || !(userObj instanceof com.example.springboot.entity.DormManager)) {
+        Object identityObj = session.getAttribute("Identity");
+        
+        if (userObj == null || identityObj == null) {
             return Result.error("-1", "无权限");
         }
-        com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
-        int dormbuildId = manager.getDormbuildId();
-        // 查当前房间的楼栋
-        DormRoom room = dormRoomService.checkRoomExist(adjustRoom.getCurrentRoomId());
-        if (room == null || room.getDormBuildId() != dormbuildId) {
-            return Result.error("-1", "无权限处理该申请");
+        
+        String identity = identityObj.toString();
+        
+        if ("admin".equals(identity)) {
+            // 管理员可以处理所有申请，不需要楼栋限制
+        } else if ("dormManager".equals(identity)) {
+            // 宿管只能处理自己楼栋的申请
+            if (!(userObj instanceof com.example.springboot.entity.DormManager)) {
+                return Result.error("-1", "无权限");
+            }
+            com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
+            Integer dormbuildId = manager.getDormbuildId();
+            
+            // 检查宿管是否有管理的楼栋
+            if (dormbuildId == null) {
+                return Result.error("-1", "无权限处理该申请：您没有分配管理的楼栋");
+            }
+            
+            // 检查当前房间的楼栋
+            DormRoom currentRoom = dormRoomService.checkRoomExist(adjustRoom.getCurrentRoomId());
+            if (currentRoom == null) {
+                return Result.error("-1", "无权限处理该申请：当前房间不存在");
+            }
+            
+            if (currentRoom.getDormBuildId() != dormbuildId) {
+                return Result.error("-1", "无权限处理该申请：当前房间不在管辖范围内");
+            }
+            
+            // 检查目标房间的楼栋
+            DormRoom targetRoom = dormRoomService.checkRoomExist(adjustRoom.getTowardsRoomId());
+            if (targetRoom == null) {
+                return Result.error("-1", "无权限处理该申请：目标房间不存在");
+            }
+            
+            if (targetRoom.getDormBuildId() != dormbuildId) {
+                return Result.error("-1", "无权限处理该申请：目标房间不在管辖范围内");
+            }
+        } else {
+            return Result.error("-1", "无权限");
         }
+        
         if (state) {
             int i = dormRoomService.adjustRoomUpdate(adjustRoom);
             if (i == -2) {
@@ -90,20 +126,45 @@ public class AdjustRoomController {
     @DeleteMapping("/delete/{id}")
     public Result<?> delete(@PathVariable Integer id, javax.servlet.http.HttpSession session) {
         Object userObj = session.getAttribute("User");
-        if (userObj == null || !(userObj instanceof com.example.springboot.entity.DormManager)) {
+        Object identityObj = session.getAttribute("Identity");
+        
+        if (userObj == null || identityObj == null) {
             return Result.error("-1", "无权限");
         }
-        com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
-        int dormbuildId = manager.getDormbuildId();
+        
+        String identity = identityObj.toString();
+        
         // 查申请
         AdjustRoom adjustRoom = adjustRoomService.getById(id);
         if (adjustRoom == null) {
             return Result.error("-1", "申请不存在");
         }
-        DormRoom room = dormRoomService.checkRoomExist(adjustRoom.getCurrentRoomId());
-        if (room == null || room.getDormBuildId() != dormbuildId) {
-            return Result.error("-1", "无权限删除该申请");
+        
+        if ("admin".equals(identity)) {
+            // 管理员可以删除所有申请，不需要楼栋限制
+        } else if ("dormManager".equals(identity)) {
+            // 宿管只能删除自己楼栋的申请
+            if (!(userObj instanceof com.example.springboot.entity.DormManager)) {
+                return Result.error("-1", "无权限");
+            }
+            com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
+            Integer dormbuildId = manager.getDormbuildId();
+            
+            // 检查当前房间的楼栋
+            DormRoom currentRoom = dormRoomService.checkRoomExist(adjustRoom.getCurrentRoomId());
+            if (currentRoom == null || currentRoom.getDormBuildId() != dormbuildId) {
+                return Result.error("-1", "无权限删除该申请：当前房间不在管辖范围内");
+            }
+            
+            // 检查目标房间的楼栋
+            DormRoom targetRoom = dormRoomService.checkRoomExist(adjustRoom.getTowardsRoomId());
+            if (targetRoom == null || targetRoom.getDormBuildId() != dormbuildId) {
+                return Result.error("-1", "无权限删除该申请：目标房间不在管辖范围内");
+            }
+        } else {
+            return Result.error("-1", "无权限");
         }
+        
         int i = adjustRoomService.deleteAdjustment(id);
         if (i == 1) {
             return Result.success();
@@ -120,14 +181,32 @@ public class AdjustRoomController {
                               @RequestParam(defaultValue = "10") Integer pageSize,
                               @RequestParam(defaultValue = "") String search,
                               javax.servlet.http.HttpSession session) {
-        // 只允许宿管查自己楼栋的申请
+        // 获取用户身份和权限控制
         Object userObj = session.getAttribute("User");
-        if (userObj == null || !(userObj instanceof com.example.springboot.entity.DormManager)) {
+        Object identityObj = session.getAttribute("Identity");
+        
+        if (userObj == null || identityObj == null) {
             return Result.error("-1", "无权限");
         }
-        com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
-        int dormbuildId = manager.getDormbuildId();
-        Page page = adjustRoomService.findByBuild(pageNum, pageSize, search, dormbuildId);
+        
+        String identity = identityObj.toString();
+        Page page;
+        
+        if ("admin".equals(identity)) {
+            // 管理员可以看到所有申请
+            page = adjustRoomService.find(pageNum, pageSize, search);
+        } else if ("dormManager".equals(identity)) {
+            // 宿管只能看到自己楼栋的申请
+            if (!(userObj instanceof com.example.springboot.entity.DormManager)) {
+                return Result.error("-1", "无权限");
+            }
+            com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
+            Integer dormbuildId = manager.getDormbuildId();
+            page = adjustRoomService.findByBuild(pageNum, pageSize, search, dormbuildId);
+        } else {
+            return Result.error("-1", "无权限");
+        }
+        
         if (page != null) {
             return Result.success(page);
         } else {

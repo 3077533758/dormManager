@@ -26,4 +26,7 @@ public interface QuitRoomService extends IService<QuitRoom> {
 
     // 查询是否有未处理的退宿申请
     boolean hasPendingQuit(String username);
+
+    // 根据楼栋ID查询退宿申请
+    Page findByBuild(Integer pageNum, Integer pageSize, String search, int dormbuildId);
 }

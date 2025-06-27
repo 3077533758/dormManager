@@ -86,7 +86,7 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
         if (search != null && !search.isEmpty()) {
             qw.like("username", search);
         }
-        // 通过currentRoomId查dormbuildId
+        // 通过currentRoomId和towardsRoomId查dormbuildId
         // 需要join或in子查询，这里用in实现
         // 查找所有属于该楼栋的房间号
         java.util.List<Integer> roomIds = baseMapper.selectRoomIdsByBuildId(dormbuildId);
@@ -94,7 +94,8 @@ public class AdjustRoomServiceImpl extends ServiceImpl<AdjustRoomMapper, AdjustR
             // 没有房间，返回空
             return page;
         }
-        qw.in("currentroom_id", roomIds);
+        // 检查当前房间或目标房间是否在宿管管理的楼栋内
+        qw.and(wrapper -> wrapper.in("currentroom_id", roomIds).or().in("towardsroom_id", roomIds));
         return this.page(page, qw);
     }
 
