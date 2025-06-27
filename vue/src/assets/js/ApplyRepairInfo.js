@@ -107,6 +107,8 @@ export default {
             this.detailDialog = true;
             this.$nextTick(() => {
                 this.detail = row;
+                this.form = JSON.parse(JSON.stringify(row));
+                this.form.displayRoomId = this.form.dormRoomId ? this.form.dormRoomId.toString().slice(-3) : '';
             });
         },
         closeDetails() {
