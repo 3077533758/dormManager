@@ -124,19 +124,15 @@ export default {
             this.dialogVisible = true;
             this.$nextTick(() => {
                 this.$refs.form.resetFields();
-                this.form.repairer = this.name
+                this.form.repairer = this.username
                 this.form.dormBuildId = this.room.dormBuildId
                 this.form.dormRoomId = this.room.dormRoomId
+                this.form.displayRoomId = this.shortRoomId
             });
         },
         save() {
             this.$refs.form.validate(async (valid) => {
-
-                console.log("************valid:",valid)
-
-                if (valid) {
-                    //新增
-                    
+                if (valid) {                    //新增
                     console.log(this.form)
                     await request.post("/repair/add", this.form).then((res) => {
                         if (res.code === "0") {
@@ -170,5 +166,26 @@ export default {
             this.currentPage = pageNum;
             this.load();
         },
+        cancelRepair(row) {
+            this.$confirm('确定要撤销该报修申请吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                request.delete(`/repair/delete/${row.id}`).then(res => {
+                    if (res.code === '0') {
+                        ElMessage({ message: '撤销成功', type: 'success' })
+                        this.load()
+                    } else {
+                        ElMessage({ message: res.msg, type: 'error' })
+                    }
+                })
+            }).catch(() => {})
+        },
+    },
+    computed: {
+        shortRoomId() {
+            return this.room.dormRoomId ? this.room.dormRoomId.toString().slice(-3) : '';
+        }
     },
 };

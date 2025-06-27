@@ -137,6 +137,22 @@ export default {
         },
         filterTag(value, row) {
             return row.state === value
+        },
+        cancelOutLive(row) {
+            this.$confirm('确定要撤销该外宿申请吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                request.delete(`/outLive/delete/${row.id}`).then(res => {
+                    if (res.code === '0') {
+                        ElMessage({ message: '撤销成功', type: 'success' })
+                        this.load()
+                    } else {
+                        ElMessage({ message: res.msg, type: 'error' })
+                    }
+                })
+            }).catch(() => {})
         }
     }
 } 

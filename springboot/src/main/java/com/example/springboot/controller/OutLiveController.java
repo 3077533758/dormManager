@@ -67,7 +67,32 @@ public class OutLiveController {
      * 删除外宿申请
      */
     @DeleteMapping("/delete/{id}")
-    public Result<?> delete(@PathVariable Integer id) {
+    public Result<?> delete(@PathVariable Integer id, javax.servlet.http.HttpSession session) {
+        Object userObj = session.getAttribute("User");
+        Object identityObj = session.getAttribute("Identity");
+        if (userObj == null || identityObj == null) {
+            return Result.error("-1", "无权限");
+        }
+        String identity = identityObj.toString();
+        OutLive outLive = outLiveService.getById(id);
+        if (outLive == null) {
+            return Result.error("-1", "外宿申请不存在");
+        }
+        if ("stu".equals(identity)) {
+            // 学生只能撤销自己未处理的外宿申请
+            String username = null;
+            if (userObj instanceof com.example.springboot.entity.Student) {
+                username = ((com.example.springboot.entity.Student) userObj).getUsername();
+            } else if (userObj instanceof com.example.springboot.entity.User) {
+                username = ((com.example.springboot.entity.User) userObj).getUsername();
+            }
+            if (!outLive.getUsername().equals(username)) {
+                return Result.error("-1", "只能撤销自己的外宿申请");
+            }
+            if (!"未处理".equals(outLive.getState())) {
+                return Result.error("-1", "已处理的外宿申请无法撤销");
+            }
+        }
         int result = outLiveService.deleteOutLive(id);
         return result == 1 ? Result.success() : Result.error("-1", "删除失败");
     }

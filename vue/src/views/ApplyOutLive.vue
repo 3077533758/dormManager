@@ -54,6 +54,11 @@
         <el-table-column label="操作" width="130px">
           <template #default="scope">
             <el-button icon="more-filled" type="default" @click="showDetail(scope.row)"></el-button>
+            <el-popconfirm v-if="scope.row.state==='未处理'" title="确认撤销该申请？" @confirm="cancelOutLive(scope.row)">
+              <template #reference>
+                <el-button icon="Delete" type="danger"></el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>

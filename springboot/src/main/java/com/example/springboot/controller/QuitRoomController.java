@@ -79,7 +79,32 @@ public class QuitRoomController {
      * 删除退宿申请
      */
     @DeleteMapping("/delete/{id}")
-    public Result<?> delete(@PathVariable Integer id) {
+    public Result<?> delete(@PathVariable Integer id, javax.servlet.http.HttpSession session) {
+        Object userObj = session.getAttribute("User");
+        Object identityObj = session.getAttribute("Identity");
+        if (userObj == null || identityObj == null) {
+            return Result.error("-1", "无权限");
+        }
+        String identity = identityObj.toString();
+        QuitRoom quitRoom = quitRoomService.getById(id);
+        if (quitRoom == null) {
+            return Result.error("-1", "退宿申请不存在");
+        }
+        if ("stu".equals(identity)) {
+            // 学生只能撤销自己未处理的退宿申请
+            String username = null;
+            if (userObj instanceof com.example.springboot.entity.Student) {
+                username = ((com.example.springboot.entity.Student) userObj).getUsername();
+            } else if (userObj instanceof com.example.springboot.entity.User) {
+                username = ((com.example.springboot.entity.User) userObj).getUsername();
+            }
+            if (!quitRoom.getUsername().equals(username)) {
+                return Result.error("-1", "只能撤销自己的退宿申请");
+            }
+            if (!"未处理".equals(quitRoom.getState())) {
+                return Result.error("-1", "已处理的退宿申请无法撤销");
+            }
+        }
         int result = quitRoomService.deleteQuit(id);
         return result == 1 ? Result.success() : Result.error("-1", "删除失败");
     }

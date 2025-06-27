@@ -65,9 +65,9 @@ public class AdjustRoomController {
         } else if ("dormManager".equals(identity)) {
             // 宿管只能处理自己楼栋的申请
             if (!(userObj instanceof com.example.springboot.entity.DormManager)) {
-                return Result.error("-1", "无权限");
-            }
-            com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
+            return Result.error("-1", "无权限");
+        }
+        com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
             Integer dormbuildId = manager.getDormbuildId();
             
             // 检查宿管是否有管理的楼栋
@@ -83,7 +83,7 @@ public class AdjustRoomController {
             
             if (currentRoom.getDormBuildId() != dormbuildId) {
                 return Result.error("-1", "无权限处理该申请：当前房间不在管辖范围内");
-            }
+        }
             
             // 检查目标房间的楼栋
             DormRoom targetRoom = dormRoomService.checkRoomExist(adjustRoom.getTowardsRoomId());
@@ -154,7 +154,7 @@ public class AdjustRoomController {
             DormRoom currentRoom = dormRoomService.checkRoomExist(adjustRoom.getCurrentRoomId());
             if (currentRoom == null || currentRoom.getDormBuildId() != dormbuildId) {
                 return Result.error("-1", "无权限删除该申请：当前房间不在管辖范围内");
-            }
+        }
             
             // 检查目标房间的楼栋
             DormRoom targetRoom = dormRoomService.checkRoomExist(adjustRoom.getTowardsRoomId());
@@ -198,9 +198,9 @@ public class AdjustRoomController {
         } else if ("dormManager".equals(identity)) {
             // 宿管只能看到自己楼栋的申请
             if (!(userObj instanceof com.example.springboot.entity.DormManager)) {
-                return Result.error("-1", "无权限");
-            }
-            com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
+            return Result.error("-1", "无权限");
+        }
+        com.example.springboot.entity.DormManager manager = (com.example.springboot.entity.DormManager) userObj;
             Integer dormbuildId = manager.getDormbuildId();
             page = adjustRoomService.findByBuild(pageNum, pageSize, search, dormbuildId);
         } else {
