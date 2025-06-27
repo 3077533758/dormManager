@@ -163,6 +163,22 @@ export default {
                 return 4
             }
             return 0
+        },
+        cancelQuit(row) {
+            this.$confirm('确定要撤销该退宿申请吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                request.delete(`/quitRoom/delete/${row.id}`).then(res => {
+                    if (res.code === '0') {
+                        ElMessage({ message: '撤销成功', type: 'success' })
+                        this.load()
+                    } else {
+                        ElMessage({ message: res.msg, type: 'error' })
+                    }
+                })
+            }).catch(() => {})
         }
     }
 } 

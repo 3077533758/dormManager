@@ -25,7 +25,7 @@ export default {
         // 只有宿管才显示管辖楼栋信息
         if (this.currentIdentity === 'dormManager') {
             this.showManagedBuilding = true;
-            this.loadBuildings();
+        this.loadBuildings();
         }
     },
     methods: {

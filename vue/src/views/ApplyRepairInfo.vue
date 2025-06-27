@@ -52,9 +52,14 @@
         <el-table-column label="订单创建时间" prop="orderBuildTime" sortable/>
         <el-table-column label="订单完成时间" prop="orderFinishTime" sortable/>
         <!--      操作栏-->
-        <el-table-column label="操作" width="74px">
+        <el-table-column label="操作" width="130px">
           <template #default="scope">
             <el-button icon="more-filled" type="default" @click="showDetail(scope.row)"></el-button>
+            <el-popconfirm v-if="scope.row.state==='未完成'" title="确认撤销该申请？" @confirm="cancelRepair(scope.row)">
+              <template #reference>
+                <el-button icon="Delete" type="danger"></el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -79,7 +84,7 @@
               <el-input v-model="form.dormBuildId" disabled style="width: 80%">{{ this.room.dormBuildId }}</el-input>
             </el-form-item>
             <el-form-item label="房间号" prop="dormRoomId" style="margin-bottom: 27px">
-              <el-input v-model="form.dormRoomId" disabled style="width: 80%">{{ this.room.dormRoomId ? this.room.dormRoomId.toString().slice(-3) : '' }}</el-input>
+              <el-input v-model="form.displayRoomId" disabled style="width: 80%"></el-input>
             </el-form-item>
             <el-form-item label="申请人" prop="repairer">
               <el-input v-model="form.repairer" disabled style="width: 80%">{{ this.name }}</el-input>
@@ -96,16 +101,6 @@
                   style="width: 80%"
                   type="textarea"
               ></el-input>
-            </el-form-item>
-            <el-form-item label="订单创建时间" prop="orderBuildTime" style="margin-top: 27px">
-              <el-date-picker
-                  v-model="form.orderBuildTime"
-                  clearable
-                  placeholder="选择时间"
-                  style="width: 50%"
-                  type="datetime"
-                  value-format="YYYY-MM-DD HH:mm:ss"
-              ></el-date-picker>
             </el-form-item>
           </el-form>
           <template #footer>

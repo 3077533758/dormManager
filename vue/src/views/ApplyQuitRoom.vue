@@ -41,9 +41,14 @@
         </el-table-column>
         <el-table-column prop="applyTime" label="申请时间"></el-table-column>
         <el-table-column prop="finishTime" label="处理时间"></el-table-column>
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column label="操作" width="130px">
           <template #default="scope">
-            <el-button type="success" @click="showDetail(scope.row)">查看详情</el-button>
+            <el-button icon="more-filled" type="default" @click="showDetail(scope.row)"></el-button>
+            <el-popconfirm v-if="scope.row.state==='未处理'" title="确认撤销该申请？" @confirm="cancelQuit(scope.row)">
+              <template #reference>
+                <el-button icon="Delete" type="danger"></el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
