@@ -72,7 +72,7 @@ export default {
             if (!this.hasRoom) {
                 return;
             }
-            request.get("/repair/find/" + this.name, {
+            request.get("/repair/find/" + this.username, {
                 params: {
                     pageNum: this.currentPage,
                     pageSize: this.pageSize,
@@ -131,8 +131,12 @@ export default {
         },
         save() {
             this.$refs.form.validate(async (valid) => {
+
+                console.log("************valid:",valid)
+
                 if (valid) {
                     //新增
+                    
                     console.log(this.form)
                     await request.post("/repair/add", this.form).then((res) => {
                         if (res.code === "0") {
