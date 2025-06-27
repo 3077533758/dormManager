@@ -70,4 +70,23 @@ public class QuitRoomServiceImpl extends ServiceImpl<QuitRoomMapper, QuitRoom> i
         qw.eq("username", username).eq("state", "未处理");
         return quitRoomMapper.selectCount(qw) > 0;
     }
+
+    @Override
+    public Page findByBuild(Integer pageNum, Integer pageSize, String search, int dormbuildId) {
+        Page<QuitRoom> page = new Page<>(pageNum, pageSize);
+        QueryWrapper<QuitRoom> qw = new QueryWrapper<>();
+        if (search != null && !search.isEmpty()) {
+            qw.like("username", search);
+        }
+        // 通过dormRoomId查dormbuildId
+        // 需要join或in子查询，这里用in实现
+        // 查找所有属于该楼栋的房间号
+        java.util.List<Integer> roomIds = baseMapper.selectRoomIdsByBuildId(dormbuildId);
+        if (roomIds == null || roomIds.isEmpty()) {
+            // 没有房间，返回空
+            return page;
+        }
+        qw.in("dormroom_id", roomIds);
+        return this.page(page, qw);
+    }
 }

@@ -74,4 +74,45 @@ public class OutLiveServiceImpl extends ServiceImpl<OutLiveMapper, OutLive> impl
         // 2. 如需腾空床位，可调用 dormRoomService.deleteBedInfo
         // dormRoomService.deleteBedInfo(...);
     }
+
+    @Override
+    public Page findByBuild(Integer pageNum, Integer pageSize, String search, int dormbuildId) {
+        Page<OutLive> page = new Page<>(pageNum, pageSize);
+        QueryWrapper<OutLive> qw = new QueryWrapper<>();
+        if (search != null && !search.isEmpty()) {
+            qw.like("username", search).or().like("name", search);
+        }
+        
+        // 先获取所有符合搜索条件的外宿申请
+        Page<OutLive> allPage = outLiveMapper.selectPage(page, qw);
+        
+        // 过滤出属于指定楼栋的申请
+        java.util.List<OutLive> filteredRecords = new java.util.ArrayList<>();
+        for (OutLive outLive : allPage.getRecords()) {
+            if (outLive.getUsername() != null) {
+                com.example.springboot.entity.DormRoom dormRoom = dormRoomService.judgeHadBed(outLive.getUsername());
+                if (dormRoom != null && dormRoom.getDormBuildId() == dormbuildId) {
+                    outLive.setDormRoomId(dormRoom.getDormRoomId());
+                    outLive.setDormBuildId(dormRoom.getDormBuildId());
+                    filteredRecords.add(outLive);
+                }
+            }
+        }
+        
+        // 重新计算分页
+        int total = filteredRecords.size();
+        int start = (pageNum - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        
+        java.util.List<OutLive> pagedRecords = new java.util.ArrayList<>();
+        if (start < total) {
+            pagedRecords = filteredRecords.subList(start, end);
+        }
+        
+        Page<OutLive> resultPage = new Page<>(pageNum, pageSize);
+        resultPage.setRecords(pagedRecords);
+        resultPage.setTotal(total);
+        
+        return resultPage;
+    }
 }

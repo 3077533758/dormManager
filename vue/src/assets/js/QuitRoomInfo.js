@@ -15,12 +15,18 @@ export default {
             form: {},
             buildings: [], // 所有楼栋（含校区、园区）
             managedBuildingId: null, // 当前管辖楼栋id
-            managedBuildingFullName: '' // 当前管辖楼栋全称
+            managedBuildingFullName: '', // 当前管辖楼栋全称
+            currentIdentity: JSON.parse(sessionStorage.getItem('identity') || '""'), // 当前用户身份
+            showManagedBuilding: false // 是否显示管辖楼栋信息
         }
     },
     created() {
         this.load();
-        this.loadBuildings();
+        // 只有宿管才显示管辖楼栋信息
+        if (this.currentIdentity === 'dormManager') {
+            this.showManagedBuilding = true;
+            this.loadBuildings();
+        }
     },
     methods: {
         loadBuildings() {
@@ -52,8 +58,8 @@ export default {
                 this.loading = false
                 this.tableData = res.data.records
                 this.total = res.data.total
-                // 自动获取管辖楼栋id（取第一页第一条数据的dormRoomId）
-                if (this.tableData.length && this.tableData[0].dormRoomId) {
+                // 只有宿管才自动获取管辖楼栋id
+                if (this.showManagedBuilding && this.tableData.length && this.tableData[0].dormRoomId) {
                     const rid = this.tableData[0].dormRoomId;
                     this.managedBuildingId = parseInt(rid.toString().substring(0, rid.toString().length - 3));
                     this.updateManagedBuildingFullName();

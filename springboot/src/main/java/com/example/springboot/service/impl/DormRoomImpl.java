@@ -215,27 +215,35 @@ public class DormRoomImpl extends ServiceImpl<DormRoomMapper, DormRoom> implemen
             return -5; // 目标床位已被占用
         }
 
-        int currentCapacity1 = calNum(dormRoom1);
-        int currentCapacity2 = calNum(dormRoom2);
-
         // 4. 执行调宿操作
-        // 4.1 清空当前床位
-        UpdateWrapper uw1 = new UpdateWrapper();
-        uw1.eq("dormroom_id", currentRoomId);
-        uw1.set(currentBedName, null);
-        uw1.set("current_capacity", currentCapacity1 - 1);
-        int result1 = dormRoomMapper.update(null, uw1);
+        if (currentRoomId == towardsRoomId) {
+            // 同寝室调宿：只需要交换床位，不改变总人数
+            UpdateWrapper uw = new UpdateWrapper();
+            uw.eq("dormroom_id", currentRoomId);
+            uw.set(currentBedName, null);
+            uw.set(towardsBedName, username);
+            int result = dormRoomMapper.update(null, uw);
+            return result;
+        } else {
+            // 跨寝室调宿：需要调整两个房间的人数
+            // 4.1 清空当前床位并减少人数
+            UpdateWrapper uw1 = new UpdateWrapper();
+            uw1.eq("dormroom_id", currentRoomId);
+            uw1.set(currentBedName, null);
+            uw1.setSql("current_capacity = current_capacity - 1");
+            int result1 = dormRoomMapper.update(null, uw1);
 
-        if (result1 == 1) {
-            // 4.2 设置目标床位
-            UpdateWrapper uw2 = new UpdateWrapper();
-            uw2.eq("dormroom_id", towardsRoomId);
-            uw2.set(towardsBedName, username);
-            uw2.set("current_capacity", currentCapacity2 + 1);
-            int result2 = dormRoomMapper.update(null, uw2);
-            return result2;
+            if (result1 == 1) {
+                // 4.2 设置目标床位并增加人数
+                UpdateWrapper uw2 = new UpdateWrapper();
+                uw2.eq("dormroom_id", towardsRoomId);
+                uw2.set(towardsBedName, username);
+                uw2.setSql("current_capacity = current_capacity + 1");
+                int result2 = dormRoomMapper.update(null, uw2);
+                return result2;
+            }
+            return -1;
         }
-        return -1;
     }
 
 

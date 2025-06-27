@@ -23,4 +23,7 @@ public interface OutLiveService extends IService<OutLive> {
 
     // 外出住宿审批通过（同步三表）
     void approveOutLive(OutLive outLive);
+
+    // 根据楼栋ID查询外宿申请
+    Page findByBuild(Integer pageNum, Integer pageSize, String search, int dormbuildId);
 }
