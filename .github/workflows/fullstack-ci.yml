@@ -2,12 +2,12 @@ name: Node.js + Spring Boot CI
 permissions:
   contents: read
 on:
-  push:
-    branches: [ "main" ]
+  #push:
+    #branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  schedule:
-    - cron: '0 0 * * *'  
+  #schedule:
+    #- cron: '0 0 * * *'  
 
 jobs:
   build:
