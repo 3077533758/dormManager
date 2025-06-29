@@ -1,0 +1,35 @@
+name: Generate cloc stats
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: ["main"]
+  schedule:
+    - cron: '0 4 * * *' 
+  workflow_dispatch:
+
+jobs:
+  cloc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cloc
+        run: sudo apt-get update && sudo apt-get install -y cloc
+
+      - name: Generate cloc stats into CODE_STATS.md
+        run: |
+          echo "# Code Statistics (cloc)" > CODE_STATS.md
+          echo "\n_Last updated: $(date -u)_\n" >> CODE_STATS.md
+          cloc . --exclude-dir=.git,node_modules,target --md >> CODE_STATS.md
+
+      - name: Commit CODE_STATS.md
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add CODE_STATS.md
+          git commit -m "chore: update code statistics" || echo "No changes to commit"
+          git push
