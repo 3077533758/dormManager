@@ -1,5 +1,5 @@
 <template>
-  <el-menu :default-active="this.path" router style="width: 200px; height:100%; min-height: calc(100vh - 40px)"
+  <el-menu :default-active="$route.path" router style="width: 200px; height:100%; min-height: calc(100vh - 40px)"
     unique-opened>
     <div style="display: flex;align-items: center;justify-content: center;padding: 11px 0;">
       <img alt="" :src="logo" style="width: 100px;height: 100px;border-radius: 50px;margin-left: -15%;">
