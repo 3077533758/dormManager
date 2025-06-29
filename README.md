@@ -150,8 +150,9 @@ npm run serve
 
 ---
 
-## 🗂️ 项目结构
+## 🗂️ 项目结构/概览
 
+### 目录结构
 ```
 dormManager/
 ├── springboot/                 # 后端项目
@@ -177,7 +178,8 @@ dormManager/
 │   └── package.json
 └── README.md
 ```
-
+### 代码概览
+👉 [View CODE_STATS.md](./CODE_STATS.md)
 ---
 
 ## 🔧 开发指南
