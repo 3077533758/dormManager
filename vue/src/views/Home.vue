@@ -53,38 +53,77 @@
       </el-row>
     </div>
     <!-- 下部 -->
-    <div class="notice-section">
-      <div class="notice-header">宿舍通告</div>
-      <div class="notice-list-scroll">
-        <div
-            v-for="(activity, index) in activities"
-            :key="index"
-            class="notice-item"
-            @click="showNoticeDetail(activity)"
-            @mousedown="addRipple($event)"
-        >
-          <div class="notice-title">{{ activity.title }}</div>
-          <div class="notice-meta">
-            <span class="notice-author" v-if="activity.author">{{ activity.author }}</span>
-            <span class="notice-time">{{ activity.releaseTime }}</span>
+    <div class="notice-chart-section">
+      <div class="notice-section">
+        <div class="notice-header">
+          <div class="notice-title-section">
+            <i class="el-icon-bell notice-icon"></i>
+            <span class="notice-title-text">最新通告</span>
           </div>
-          <div class="notice-preview" v-if="activity.content || activity.noticeContent">
-            {{ (activity.content || activity.noticeContent).replace(/<[^>]+>/g, '').slice(0, 60) }}<span v-if="(activity.content || activity.noticeContent).length > 60">...</span>
+          <div class="notice-count">{{ activities.length }} 条</div>
+        </div>
+        <div class="notice-list-container">
+          <div
+              v-for="(activity, index) in activities"
+              :key="index"
+              class="notice-card"
+              @click="showNoticeDetail(activity)"
+          >
+            <div class="notice-card-header">
+              <div class="notice-card-title">{{ getCleanContent(activity.title) }}</div>
+              <div class="notice-card-badge" v-if="index < 3">NEW</div>
+            </div>
+            <div class="notice-card-preview" v-if="activity.content || activity.noticeContent">
+              {{ getCleanContent(activity.content || activity.noticeContent).slice(0, 80) }}<span v-if="getCleanContent(activity.content || activity.noticeContent).length > 80">...</span>
+            </div>
+            <div class="notice-card-footer">
+              <div class="notice-card-meta">
+                <span class="notice-author" v-if="activity.author">
+                  <i class="el-icon-user"></i>
+                  {{ activity.author }}
+                </span>
+                <span class="notice-time">
+                  <i class="el-icon-time"></i>
+                  {{ formatTime(activity.releaseTime) }}
+                </span>
+              </div>
+              <div class="notice-card-action">
+                <i class="el-icon-arrow-right"></i>
+              </div>
+            </div>
+          </div>
+          <div v-if="activities.length === 0" class="empty-notice">
+            <i class="el-icon-document"></i>
+            <p>暂无通告</p>
           </div>
         </div>
       </div>
+      <div class="chart-section">
+        <div style="width:100%">
+          <div class="chart-title">宿舍人数统计图</div>
+          <home_echarts />
+        </div>
+      </div>
     </div>
-    <el-dialog v-model="noticeDialogVisible" title="通告详情" width="600px" :close-on-click-modal="true" class="notice-dialog">
-      <div v-if="currentNotice">
-        <div class="dialog-title">{{ currentNotice.title }}</div>
+    <el-dialog 
+      v-model="noticeDialogVisible" 
+      title="通告详情" 
+      width="600px" 
+      :close-on-click-modal="true" 
+      class="notice-dialog"
+      :show-close="true"
+      :before-close="handleDialogClose"
+    >
+      <div v-if="currentNotice" class="dialog-content-wrapper">
+        <div class="dialog-title">{{ getCleanContent(currentNotice.title) }}</div>
         <div class="dialog-meta">
           <span v-if="currentNotice.author" class="dialog-author">发布人：{{ currentNotice.author }}</span>
           <span class="dialog-time">发布时间：{{ currentNotice.releaseTime }}</span>
         </div>
-        <div class="dialog-content">{{ currentNotice.content || currentNotice.noticeContent }}</div>
+        <div class="dialog-content" v-html="formatContent(currentNotice.content || currentNotice.noticeContent)"></div>
       </div>
       <template #footer>
-        <el-button @click="noticeDialogVisible = false">关闭</el-button>
+        <el-button @click="noticeDialogVisible = false" type="primary">关闭</el-button>
       </template>
     </el-dialog>
   </el-card>
@@ -92,8 +131,10 @@
 <script>
 import request from "@/utils/request";
 import { ElMessage } from "element-plus";
+import home_echarts from "@/components/home_echarts.vue";
 export default {
   name: "Home",
+  components: { home_echarts },
   data() {
     return {
       studentNum: "",
@@ -238,6 +279,50 @@ export default {
         ripple.remove();
       }, 600);
     },
+    getCleanContent(content) {
+      if (!content) return '';
+      // 先解码HTML实体字符，然后移除HTML标签
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+      const decodedContent = tempDiv.textContent || tempDiv.innerText || '';
+      // 移除HTML标签但保留文本内容
+      return decodedContent.replace(/<[^>]*>/g, '');
+    },
+    formatContent(content) {
+      if (!content) return '';
+      // 安全地处理HTML内容，只允许基本的格式化标签
+      const allowedTags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li'];
+      const cleanContent = content.replace(/<[^>]*>/g, (match) => {
+        const tagName = match.match(/<\/(\w+)|<(\w+)/);
+        if (tagName && allowedTags.includes(tagName[1] || tagName[2])) {
+          return match;
+        }
+        return '';
+      });
+      return cleanContent;
+    },
+    handleDialogClose() {
+      this.noticeDialogVisible = false;
+    },
+    formatTime(time) {
+      if (!time) return '';
+      const date = new Date(time);
+      const now = new Date();
+      const diff = now - date;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor(diff / (1000 * 60));
+      
+      if (days > 0) {
+        return `${days}天前`;
+      } else if (hours > 0) {
+        return `${hours}小时前`;
+      } else if (minutes > 0) {
+        return `${minutes}分钟前`;
+      } else {
+        return '刚刚';
+      }
+    },
   },
 };
 </script>
@@ -313,172 +398,218 @@ export default {
 .gradient-purple {
   background: linear-gradient(135deg, #f3e6ff 0%, #e0c2ff 100%);
 }
-.notice-section {
+.notice-chart-section {
+  display: flex;
+  flex-direction: row;
+  gap: 36px;
+  justify-content: space-between;
+  align-items: flex-start;
   width: 100%;
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
   margin-top: 40px;
+}
+.notice-section {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 600px;
+}
+.chart-section {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, #f8fafc 0%, #e9f0fb 100%);
   border-radius: 18px;
   box-shadow: 0 2px 24px 0 rgba(80,120,200,0.10);
   padding: 32px 24px 32px 24px;
+  margin-left: 0;
 }
 .notice-header {
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 30px;
-  margin-left: 10px;
-  color: #2d3a4b;
-  letter-spacing: 1px;
-}
-.notice-list-scroll {
-  max-height: 700px;
-  min-height: 420px;
-  width: 100%;
-  border: none;
-  border-radius: 18px;
-  background: transparent;
-  padding: 8px 0 8px 0;
-  box-shadow: none;
-  scrollbar-width: thin;
-  scrollbar-color: #b3c6e0 #f8fafc;
-  animation: fadeInWide 0.9s cubic-bezier(.23,1.01,.32,1) both;
-  transition: box-shadow 0.4s;
-  box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-@keyframes fadeInWide {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) scaleX(0.7);
-    box-shadow: 0 0 0 rgba(80,120,200,0.00);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scaleX(1);
-    box-shadow: 0 2px 24px 0 rgba(80,120,200,0.10);
-  }
-}
-.notice-list-scroll::-webkit-scrollbar {
-  width: 8px;
-  background: #f8fafc;
-  border-radius: 8px;
-}
-.notice-list-scroll::-webkit-scrollbar-thumb {
-  background: #b3c6e0;
-  border-radius: 8px;
-}
-.notice-item {
-  position: relative;
-  padding: 28px 38px 20px 38px;
-  margin: 0 18px 28px 18px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #fff 80%, #e9f0fb 100%);
-  box-shadow: 0 4px 18px rgba(80,120,200,0.13);
-  border: 1.5px solid #e3eaf5;
-  cursor: pointer;
-  transition: box-shadow 0.35s, border 0.25s, background 0.25s, transform 0.25s, filter 0.25s;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  opacity: 0;
-  transform: translateY(30px) scale(0.97);
-  animation: noticeFadeIn 0.7s cubic-bezier(.23,1.01,.32,1) forwards;
-  filter: brightness(1) saturate(1);
-  width: auto;
-  min-width: 0;
-  max-width: unset;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.notice-item:nth-child(1) { animation-delay: 0.05s; }
-.notice-item:nth-child(2) { animation-delay: 0.12s; }
-.notice-item:nth-child(3) { animation-delay: 0.19s; }
-.notice-item:nth-child(4) { animation-delay: 0.26s; }
-.notice-item:nth-child(5) { animation-delay: 0.33s; }
-.notice-item:nth-child(6) { animation-delay: 0.40s; }
-.notice-item:nth-child(7) { animation-delay: 0.47s; }
-.notice-item:nth-child(8) { animation-delay: 0.54s; }
-.notice-item:nth-child(9) { animation-delay: 0.61s; }
-.notice-item:nth-child(10) { animation-delay: 0.68s; }
-@keyframes noticeFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(30px) scale(0.97);
-    filter: blur(2px) brightness(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0) brightness(1);
-  }
-}
-.notice-item:last-child {
-  margin-bottom: 0;
-}
-.notice-item:hover {
-  box-shadow: 0 16px 48px rgba(80,120,200,0.22), 0 0 0 2px #4e8cff33;
-  border: 2px solid #4e8cff;
-  background: linear-gradient(135deg, #f4f9ff 80%, #e9f0fb 100%);
-  transform: translateY(-5px) scale(1.045) rotateZ(-0.2deg);
-  filter: brightness(1.06) saturate(1.12);
-}
-.notice-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #1a237e;
-  margin-bottom: 2px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  letter-spacing: 0.5px;
-}
-.notice-meta {
   display: flex;
   align-items: center;
-  gap: 18px;
-  margin-bottom: 2px;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 0 4px;
 }
-.notice-author {
+.notice-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.notice-icon {
+  font-size: 24px;
   color: #4e8cff;
-  font-size: 15px;
-  font-weight: 600;
 }
-.notice-time {
-  color: #8fa2b7;
-  font-size: 15px;
-  align-self: flex-end;
+.notice-title-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2d3a4b;
   letter-spacing: 0.5px;
 }
-.notice-preview {
-  color: #3a4a5d;
-  font-size: 16px;
-  margin-top: 4px;
-  opacity: 0.85;
-  line-height: 1.6;
-  min-height: 22px;
+.notice-count {
+  background: linear-gradient(135deg, #4e8cff 0%, #3b7de9 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(78,140,255,0.3);
 }
-.ripple-effect {
+.notice-list-container {
+  max-height: 700px;
+  min-height: 420px;
+  overflow-y: auto;
+  padding: 8px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #b3c6e0 #f8fafc;
+}
+.notice-list-container::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+.notice-list-container::-webkit-scrollbar-thumb {
+  background: #b3c6e0;
+  border-radius: 3px;
+}
+.notice-card {
+  position: relative;
+  padding: 24px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border: 1px solid #e8f0fe;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+.notice-card::before {
+  content: '';
   position: absolute;
-  border-radius: 50%;
-  background: rgba(78,140,255,0.18);
-  pointer-events: none;
-  transform: scale(0);
-  animation: ripple-animate 0.6s linear;
-  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4e8cff, #3b7de9);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
-@keyframes ripple-animate {
-  to {
-    transform: scale(2.5);
-    opacity: 0;
-  }
+.notice-card:hover::before {
+  transform: scaleX(1);
+}
+.notice-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(78,140,255,0.15);
+  border-color: #4e8cff;
+}
+.notice-card:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+.notice-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.notice-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a237e;
+  line-height: 1.4;
+  flex: 1;
+  margin-right: 12px;
+}
+.notice-card-badge {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(255,107,107,0.3);
+}
+.notice-card-preview {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notice-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+.notice-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.notice-author, .notice-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.notice-author i, .notice-time i {
+  font-size: 14px;
+}
+.notice-card-action {
+  color: #4e8cff;
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+.notice-card:hover .notice-card-action {
+  transform: translateX(4px);
+}
+.empty-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+.empty-notice i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+.empty-notice p {
+  font-size: 16px;
+  margin: 0;
 }
 .notice-dialog >>> .el-dialog__body {
   padding-top: 12px;
   padding-bottom: 12px;
   background: linear-gradient(135deg, #f8fafc 0%, #e9f0fb 100%);
   border-radius: 12px;
+}
+.dialog-content-wrapper {
+  animation: dialogFadeIn 0.3s ease-out;
+}
+@keyframes dialogFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .dialog-title {
   font-size: 26px;
@@ -516,15 +647,22 @@ export default {
   margin-top: 8px;
 }
 @media (max-width: 1200px) {
-  .main-card {
-    padding: 16px 4px 24px 4px;
+  .notice-chart-section {
+    flex-direction: column;
+    gap: 18px;
   }
-  .notice-section {
-    padding: 18px 2px 18px 2px;
-    min-width: 0;
+  .chart-section, .notice-section {
+    max-width: 100%;
+    padding: 12px 2px 12px 2px;
   }
-  .notice-list-scroll {
-    min-width: 0;
-  }
+}
+.chart-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a237e;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  text-align: center;
+  width: 100%;
 }
 </style>
