@@ -21,7 +21,8 @@
     </div>
     <!-- 头部数据 -->
     <div class="stats-section">
-      <el-row :gutter="30" class="topInfo">
+      <StudentStats v-if="isStudent && hasRoom" />
+      <el-row v-else :gutter="30" class="topInfo">
         <el-col :span="6">
           <div class="stat-card gradient-blue">
             <div class="stat-label">学生统计</div>
@@ -54,7 +55,7 @@
     </div>
     <!-- 下部 -->
     <div class="notice-chart-section">
-      <div class="notice-section">
+      <div v-if="isStudent" class="notice-section student-notice-full">
         <div class="notice-header">
           <div class="notice-title-section">
             <i class="el-icon-bell notice-icon"></i>
@@ -98,12 +99,58 @@
           </div>
         </div>
       </div>
-      <div class="chart-section">
-        <div style="width:100%">
-          <div class="chart-title">宿舍人数统计图</div>
-          <home_echarts />
+      <template v-else>
+        <div class="notice-section">
+          <div class="notice-header">
+            <div class="notice-title-section">
+              <i class="el-icon-bell notice-icon"></i>
+              <span class="notice-title-text">最新通告</span>
+            </div>
+            <div class="notice-count">{{ activities.length }} 条</div>
+          </div>
+          <div class="notice-list-container">
+            <div
+                v-for="(activity, index) in activities"
+                :key="index"
+                class="notice-card"
+                @click="showNoticeDetail(activity)"
+            >
+              <div class="notice-card-header">
+                <div class="notice-card-title">{{ getCleanContent(activity.title) }}</div>
+                <div class="notice-card-badge" v-if="index < 3">NEW</div>
+              </div>
+              <div class="notice-card-preview" v-if="activity.content || activity.noticeContent">
+                {{ getCleanContent(activity.content || activity.noticeContent).slice(0, 80) }}<span v-if="getCleanContent(activity.content || activity.noticeContent).length > 80">...</span>
+              </div>
+              <div class="notice-card-footer">
+                <div class="notice-card-meta">
+                  <span class="notice-author" v-if="activity.author">
+                    <i class="el-icon-user"></i>
+                    {{ activity.author }}
+                  </span>
+                  <span class="notice-time">
+                    <i class="el-icon-time"></i>
+                    {{ formatTime(activity.releaseTime) }}
+                  </span>
+                </div>
+                <div class="notice-card-action">
+                  <i class="el-icon-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+            <div v-if="activities.length === 0" class="empty-notice">
+              <i class="el-icon-document"></i>
+              <p>暂无通告</p>
+            </div>
+          </div>
         </div>
-      </div>
+        <div class="chart-section">
+          <div style="width:100%">
+            <div class="chart-title">宿舍人数统计图</div>
+            <home_echarts />
+          </div>
+        </div>
+      </template>
     </div>
     <el-dialog 
       v-model="noticeDialogVisible" 
@@ -132,9 +179,10 @@
 import request from "@/utils/request";
 import { ElMessage } from "element-plus";
 import home_echarts from "@/components/home_echarts.vue";
+import StudentStats from "@/components/StudentStats.vue";
 export default {
   name: "Home",
-  components: { home_echarts },
+  components: { home_echarts, StudentStats },
   data() {
     return {
       studentNum: "",
@@ -663,6 +711,11 @@ export default {
   letter-spacing: 1px;
   margin-bottom: 18px;
   text-align: center;
+  width: 100%;
+}
+.student-notice-full {
+  max-width: 100%;
+  flex: 1 1 0;
   width: 100%;
 }
 </style>
