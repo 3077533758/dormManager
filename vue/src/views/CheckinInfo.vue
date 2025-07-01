@@ -39,8 +39,9 @@
       <el-table-column prop="bedNumber" label="床位号" width="80" />
       <el-table-column prop="remarks" label="备注" width="120" />
       <el-table-column prop="operator" label="操作人" width="100" />
-      <el-table-column label="操作" width="100" fixed="right">
+      <el-table-column label="操作" width="160" fixed="right">
         <template #default="scope">
+          <el-button size="small" type="primary" @click="showRoomDetail(scope.row.dormroomId)">查看详情</el-button>
           <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>

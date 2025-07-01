@@ -28,4 +28,7 @@ public interface StudentService extends IService<Student> {
     //床位信息，查询该学生信息
     Student stuInfo(String username);
 
+    // 根据学号和姓名查询学生
+    Student getByUsernameAndName(String username, String name);
+
 }

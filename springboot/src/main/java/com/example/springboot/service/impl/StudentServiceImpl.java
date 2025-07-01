@@ -97,4 +97,15 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         Student student = studentMapper.selectOne(qw);
         return student;
     }
+
+    /**
+     * 根据学号和姓名查询学生
+     */
+    @Override
+    public Student getByUsernameAndName(String username, String name) {
+        QueryWrapper<Student> qw = new QueryWrapper<>();
+        qw.eq("username", username);
+        qw.eq("name", name);
+        return studentMapper.selectOne(qw);
+    }
 }
