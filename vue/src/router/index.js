@@ -24,6 +24,7 @@ export const constantRoutes = [
             {path: '/violationInfo', name: 'ViolationInfo', component: () => import("@/views/ViolationInfo")},
             {path: '/evaluationInfo', name: 'EvaluationInfo', component: () => import("@/views/EvaluationInfo")},
             {path: '/checkinInfo', name: 'CheckinInfo', component: () => import("@/views/CheckinInfo")},
+            {path: '/batchCheckin', name: 'BatchCheckin', component: () => import("@/views/BatchCheckin")},
             {path: '/reportInfo', name: 'ReportInfo', component: () => import("@/views/ReportInfo")},
             {path: '/campusMonitor', name: 'CampusMonitor', component: () => import("@/views/CampusMonitor")},
             //
@@ -34,6 +35,11 @@ export const constantRoutes = [
             {path: '/applyOutLive', name: 'ApplyOutLive', component: () => import("@/views/ApplyOutLive")},
 
             {path: '/selfInfo', name: 'SelfInfo', component: () => import("@/views/SelfInfo")},
+            {
+                path: '/studentImport',
+                name: 'StudentImport',
+                component: () => import('@/views/StudentImport.vue')
+            },
         ]
     },
 

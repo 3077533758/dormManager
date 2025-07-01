@@ -19,6 +19,10 @@
       </template>
       <el-menu-item v-if="this.judgeIdentity() !== 0" index="/stuInfo">学生信息</el-menu-item>
       <el-menu-item v-if="this.judgeIdentity() === 2" index="/dormManagerInfo">宿管信息</el-menu-item>
+      <el-menu-item index="/studentImport">
+        <el-icon><upload /></el-icon>
+        <span>批量导入学生</span>
+      </el-menu-item>
     </el-sub-menu>
     <el-sub-menu v-if="this.judgeIdentity() !== 0" index="3">
       <template #title>
@@ -72,6 +76,7 @@
         <span>住宿管理</span>
       </template>
       <el-menu-item v-if="this.judgeIdentity() !== 0" index="/checkinInfo">入住管理</el-menu-item>
+      <el-menu-item v-if="this.judgeIdentity() !== 0" index="/batchCheckin">批量入住</el-menu-item>
     </el-sub-menu>
     <el-sub-menu v-if="this.judgeIdentity() === 2" index="8">
       <template #title>
