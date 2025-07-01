@@ -41,6 +41,17 @@ public class StudentCheckinServiceImpl implements StudentCheckinService {
     }
 
     @Override
+    public Page<StudentCheckin> findPageByBuild(Integer pageNum, Integer pageSize, String search, Integer dormbuildId) {
+        QueryWrapper<StudentCheckin> queryWrapper = new QueryWrapper<>();
+        if (search != null && !search.isEmpty()) {
+            queryWrapper.like("student_name", search).or().like("student_username", search);
+        }
+        queryWrapper.eq("dormbuild_id", dormbuildId);
+        queryWrapper.orderByDesc("action_time");
+        return studentCheckinMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
+    }
+
+    @Override
     public int addStudentCheckin(StudentCheckin studentCheckin) {
         // 添加前先查 student 表
         Student student = studentMapper.selectById(studentCheckin.getStudentUsername());
@@ -163,6 +174,22 @@ public class StudentCheckinServiceImpl implements StudentCheckinService {
 
     @Override
     public int deleteById(Integer id) {
+        return studentCheckinMapper.deleteById(id);
+    }
+
+    @Override
+    public int deleteByIdWithAuth(Integer id, Integer dormbuildId) {
+        // 先查询记录，检查权限
+        StudentCheckin checkin = studentCheckinMapper.selectById(id);
+        if (checkin == null) {
+            return -1; // 记录不存在
+        }
+        
+        // 检查是否属于指定楼栋
+        if (checkin.getDormbuildId() != dormbuildId) {
+            return -2; // 无权限删除
+        }
+        
         return studentCheckinMapper.deleteById(id);
     }
 } 

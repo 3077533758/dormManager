@@ -275,4 +275,114 @@ CREATE TABLE `dorm_evaluation` (
   KEY `idx_building` (`dormbuild_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='寝室评比表';
 
+-- ----------------------------
+-- Table structure for dorm_evaluation
+-- ----------------------------
+DROP TABLE IF EXISTS `dorm_evaluation`;
+CREATE TABLE `dorm_evaluation` (
+                                   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+                                   `dormroom_id` int NOT NULL COMMENT '宿舍房间号',
+                                   `dormbuild_id` int NOT NULL COMMENT '宿舍楼号',
+                                   `evaluation_period` varchar(50) NOT NULL COMMENT '评比周期(如:2024-2025-1)',
+                                   `hygiene_score` decimal(5,2) DEFAULT 0.00 COMMENT '卫生得分',
+                                   `gpa_score` decimal(5,2) DEFAULT 0.00 COMMENT '人均学分绩点',
+                                   `total_score` decimal(5,2) DEFAULT 0.00 COMMENT '综合得分',
+                                   `star_level` enum('无星','二星','三星','四星','五星') DEFAULT '无星' COMMENT '星级',
+                                   `evaluation_type` enum('星级寝室','院文明寝室') DEFAULT '星级寝室' COMMENT '评比类型',
+                                   `status` enum('待评选','已评选','已发布') DEFAULT '待评选' COMMENT '状态',
+                                   `evaluator` varchar(255) DEFAULT NULL COMMENT '评选人员',
+                                   `evaluation_time` datetime DEFAULT NULL COMMENT '评选时间',
+                                   `remarks` text COMMENT '备注',
+                                   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                   PRIMARY KEY (`id`),
+                                   UNIQUE KEY `uk_room_period` (`dormroom_id`, `evaluation_period`),
+                                   KEY `idx_building` (`dormbuild_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='寝室评比表';
+-- ----------------------------
+-- Table structure for batch_checkin_record
+-- ----------------------------
+DROP TABLE IF EXISTS `batch_checkin_record`;
+CREATE TABLE `batch_checkin_record` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `batch_no` varchar(32) NOT NULL COMMENT '批次号',
+  `operator` varchar(50) NOT NULL COMMENT '操作人',
+  `total_count` int NOT NULL COMMENT '总数量',
+  `success_count` int DEFAULT 0 COMMENT '成功数量',
+  `fail_count` int DEFAULT 0 COMMENT '失败数量',
+  `status` varchar(20) DEFAULT 'PENDING' COMMENT '状态：PENDING/PROCESSING/COMPLETED/FAILED',
+  `strategy` varchar(20) DEFAULT 'CONTINUE_ON_ERROR' COMMENT '处理策略',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `complete_time` datetime DEFAULT NULL COMMENT '完成时间',
+  `remark` text COMMENT '备注',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_batch_no` (`batch_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='批量入住批次记录表';
+
+-- ----------------------------
+-- Table structure for batch_checkin_detail
+-- ----------------------------
+DROP TABLE IF EXISTS `batch_checkin_detail`;
+CREATE TABLE `batch_checkin_detail` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `batch_no` varchar(32) NOT NULL COMMENT '批次号',
+  `student_username` varchar(50) NOT NULL COMMENT '学号',
+  `student_name` varchar(50) DEFAULT NULL COMMENT '学生姓名',
+  `dormbuild_id` int NOT NULL COMMENT '楼栋ID',
+  `dormroom_id` int NOT NULL COMMENT '房间号',
+  `bed_number` int NOT NULL COMMENT '床位号',
+  `status` varchar(20) DEFAULT 'PENDING' COMMENT '状态：PENDING/SUCCESS/FAILED/SKIPPED',
+  `error_message` text COMMENT '错误信息',
+  `process_time` datetime DEFAULT NULL COMMENT '处理时间',
+  `remark` text COMMENT '备注',
+  PRIMARY KEY (`id`),
+  KEY `idx_batch_no` (`batch_no`),
+  KEY `idx_student_username` (`student_username`),
+  KEY `idx_dormbuild_id` (`dormbuild_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='批量入住详情记录表';
+
+-- ----------------------------
+-- Table structure for batch_student_import_record
+-- ----------------------------
+DROP TABLE IF EXISTS `batch_student_import_record`;
+CREATE TABLE `batch_student_import_record` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `batch_no` varchar(32) NOT NULL COMMENT '批次号',
+    `operator` varchar(50) NOT NULL COMMENT '操作人',
+    `total_count` int NOT NULL COMMENT '总数量',
+    `success_count` int DEFAULT 0 COMMENT '成功数量',
+    `fail_count` int DEFAULT 0 COMMENT '失败数量',
+    `status` varchar(20) DEFAULT 'PENDING' COMMENT '状态：PENDING/PROCESSING/COMPLETED/FAILED',
+    `strategy` varchar(20) DEFAULT 'CONTINUE_ON_ERROR' COMMENT '处理策略',
+    `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `complete_time` datetime DEFAULT NULL COMMENT '完成时间',
+    `remark` text COMMENT '备注',
+        PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_batch_no_student` (`batch_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='批量导入学生批次记录表';
+
+-- ----------------------------
+-- Table structure for batch_student_import_detail
+-- ----------------------------
+DROP TABLE IF EXISTS `batch_student_import_detail`;
+CREATE TABLE `batch_student_import_detail` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `batch_no` varchar(32) NOT NULL COMMENT '批次号',
+    `username` varchar(50) NOT NULL COMMENT '   学号',
+    `name` varchar(50) DEFAULT NULL COMMENT '姓名',
+    `gender` enum('男','女') DEFAULT NULL COMMENT '性别',
+    `age` int DEFAULT NULL COMMENT '年龄',
+    `phone_num` varchar(11) DEFAULT NULL COMMENT '手机号',
+    `email` varchar(255) DEFAULT NULL COMMENT '邮箱',
+    `status` varchar(20) DEFAULT 'PENDING' COMMENT '状态：PENDING/SUCCESS/FAILED/SKIPPED',
+    `error_message` text COMMENT '错误信息',
+    `process_time` datetime DEFAULT NULL COMMENT '处理时间',
+    `remark` text COMMENT '备注',
+    PRIMARY KEY (`id`),
+    KEY `idx_batch_no_student` (`batch_no`),
+    KEY `idx_username_student` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='批量导入学生详情记录表';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
 
