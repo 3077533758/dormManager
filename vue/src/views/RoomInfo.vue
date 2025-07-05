@@ -153,7 +153,8 @@
           </el-table-column>
           <el-table-column label="房间号">
             <template #default="scope">
-              {{ scope.row.dormRoomId.toString().slice(-3) }}
+              <span v-if="currentIdentity === 'admin'">{{ scope.row.dormRoomId }}</span>
+              <span v-else>{{ scope.row.dormRoomId.toString().slice(-3) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="楼栋号" prop="dormBuildId" sortable/>

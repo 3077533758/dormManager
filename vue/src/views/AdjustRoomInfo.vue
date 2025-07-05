@@ -30,13 +30,15 @@
           <el-table-column label="姓名" prop="name" width="100px"/>
           <el-table-column label="当前房间号" prop="currentRoomId" sortable>
             <template #default="scope">
-              {{ scope.row.currentRoomId ? scope.row.currentRoomId.toString().slice(-3) : '' }}
+              <span v-if="currentIdentity === 'admin'">{{ scope.row.currentRoomId || '' }}</span>
+              <span v-else>{{ scope.row.currentRoomId ? scope.row.currentRoomId.toString().slice(-3) : '' }}</span>
             </template>
           </el-table-column>
           <el-table-column label="当前床位号" prop="currentBedId" sortable/>
           <el-table-column label="目标房间号" prop="towardsRoomId" sortable>
             <template #default="scope">
-              {{ scope.row.towardsRoomId ? scope.row.towardsRoomId.toString().slice(-3) : '' }}
+              <span v-if="currentIdentity === 'admin'">{{ scope.row.towardsRoomId || '' }}</span>
+              <span v-else>{{ scope.row.towardsRoomId ? scope.row.towardsRoomId.toString().slice(-3) : '' }}</span>
             </template>
           </el-table-column>
           <el-table-column label="目标床位号" prop="towardsBedId" sortable/>
@@ -103,13 +105,13 @@
                 <el-input v-model="form.name" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item disabled label="当前房间号" prop="currentRoomId">
-                <el-input :value="form.currentRoomId ? form.currentRoomId.toString().slice(-3) : ''" disabled style="width: 80%"></el-input>
+                <el-input :value="currentIdentity === 'admin' ? form.currentRoomId : (form.currentRoomId ? form.currentRoomId.toString().slice(-3) : '')" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="当前床位号" prop="currentBedId">
                 <el-input v-model="form.currentBedId" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="目标房间号" prop="towardsRoomId">
-                <el-input :value="form.towardsRoomId ? form.towardsRoomId.toString().slice(-3) : ''" disabled style="width: 80%"></el-input>
+                <el-input :value="currentIdentity === 'admin' ? form.towardsRoomId : (form.towardsRoomId ? form.towardsRoomId.toString().slice(-3) : '')" disabled style="width: 80%"></el-input>
               </el-form-item>
               <el-form-item label="目标床位号" prop="towardsBedId">
                 <el-input v-model="form.towardsBedId" disabled style="width: 80%"></el-input>
@@ -155,7 +157,8 @@
               </el-form-item>
               <el-form-item label="当前房间号：" prop="currentRoomId">
                 <template #default="scope">
-                  <span>{{ form.currentRoomId ? form.currentRoomId.toString().slice(-3) : '' }}</span>
+                  <span v-if="currentIdentity === 'admin'">{{ form.currentRoomId }}</span>
+                  <span v-else>{{ form.currentRoomId ? form.currentRoomId.toString().slice(-3) : '' }}</span>
                 </template>
               </el-form-item>
               <el-form-item label="当前床位号：" prop="currentBedId">
@@ -165,7 +168,8 @@
               </el-form-item>
               <el-form-item label="目标房间号：" prop="towardsRoomId">
                 <template #default="scope">
-                  <span>{{ form.towardsRoomId ? form.towardsRoomId.toString().slice(-3) : '' }}</span>
+                  <span v-if="currentIdentity === 'admin'">{{ form.towardsRoomId }}</span>
+                  <span v-else>{{ form.towardsRoomId ? form.towardsRoomId.toString().slice(-3) : '' }}</span>
                 </template>
               </el-form-item>
               <el-form-item label="目标床位号：" prop="towardsBedId">

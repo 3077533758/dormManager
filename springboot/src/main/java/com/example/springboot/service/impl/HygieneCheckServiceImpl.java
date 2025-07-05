@@ -23,9 +23,12 @@ public class HygieneCheckServiceImpl implements HygieneCheckService {
     public Page<HygieneCheck> findPage(Integer pageNum, Integer pageSize, String search) {
         QueryWrapper<HygieneCheck> queryWrapper = new QueryWrapper<>();
         if (search != null && !search.isEmpty()) {
-            queryWrapper.like("dormroom_id", search)
+            // 支持按房间号、检查人员、等级搜索
+            queryWrapper.and(wrapper -> wrapper
+                .like("dormroom_id", search)
                     .or().like("checker", search)
-                    .or().like("grade", search);
+                .or().like("grade", search)
+            );
         }
         queryWrapper.orderByDesc("check_date");
         
@@ -99,10 +102,10 @@ public class HygieneCheckServiceImpl implements HygieneCheckService {
     public Double getAverageScoreByRoom(Integer roomId) {
         QueryWrapper<HygieneCheck> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("dormroom_id", roomId);
-        queryWrapper.select("AVG(total_score) as avg_score");
+        queryWrapper.select("AVG(total_score) as total_score");
         
         List<HygieneCheck> list = hygieneCheckMapper.selectList(queryWrapper);
-        if (list != null && !list.isEmpty()) {
+        if (list != null && !list.isEmpty() && list.get(0).getTotalScore() != null) {
             return list.get(0).getTotalScore().doubleValue();
         }
         return 0.0;

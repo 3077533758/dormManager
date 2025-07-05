@@ -2,7 +2,7 @@
   <div class="hygiene-container">
     <div class="header">
       <h2>卫生管理</h2>
-      <el-button type="primary" @click="showAddDialog = true">
+      <el-button type="primary" @click="handleAdd">
         <el-icon><Plus /></el-icon>
         新增卫生检查
       </el-button>
@@ -29,7 +29,7 @@
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
       <el-table-column label="房间号">
         <template #default="scope">
-          {{ scope.row.dormroomId ? scope.row.dormroomId.toString().slice(-3) : '' }}
+          {{ scope.row.dormroomId || '' }}
         </template>
       </el-table-column>
       <el-table-column prop="checkDate" label="检查日期" width="120" />
@@ -74,6 +74,7 @@
       v-model="showAddDialog"
       :title="isEdit ? '编辑卫生检查' : '新增卫生检查'"
       width="600px"
+      @close="resetForm"
     >
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
         <el-form-item label="房间号" prop="inputRoom">
@@ -87,6 +88,7 @@
             v-model="form.checkDate"
             type="date"
             placeholder="选择检查日期"
+            value-format="YYYY-MM-DD"
             style="width: 100%"
           />
         </el-form-item>
@@ -195,8 +197,14 @@ export default {
     })
 
     const rules = {
-      inputRoom: [{ required: true, message: '请输入房间号', trigger: 'blur' }],
-      dormbuildId: [{ required: true, message: '请输入宿舍楼号', trigger: 'blur' }],
+      inputRoom: [
+        { required: true, message: '请输入房间号', trigger: 'blur' },
+        { pattern: /^\d{3}$/, message: '房间号必须是3位数字', trigger: 'blur' }
+      ],
+      dormbuildId: [
+        { required: true, message: '请输入宿舍楼号', trigger: 'blur' },
+        { pattern: /^\d+$/, message: '宿舍楼号必须是数字', trigger: 'blur' }
+      ],
       checkDate: [{ required: true, message: '请选择检查日期', trigger: 'change' }],
       checker: [{ required: true, message: '请输入检查人员', trigger: 'blur' }]
     }
@@ -240,10 +248,22 @@ export default {
       fetchData()
     }
 
+    // 新增
+    const handleAdd = () => {
+      isEdit.value = false
+      resetForm()
+      showAddDialog.value = true
+    }
+
     // 编辑
     const handleEdit = (row) => {
       isEdit.value = true
-      Object.assign(form, row)
+      // 将后端字段转换为前端字段
+      const editData = {
+        ...row,
+        inputRoom: row.dormroomId ? row.dormroomId.toString().slice(-3) : ''
+      }
+      Object.assign(form, editData)
       showAddDialog.value = true
     }
 
@@ -275,10 +295,25 @@ export default {
       try {
         await formRef.value.validate()
         
+        // 构建提交给后端的数据
+        const submitData = {
+          id: form.id,
+          dormroomId: parseInt(form.dormbuildId + form.inputRoom), // 组合楼栋号和房间号
+          dormbuildId: parseInt(form.dormbuildId),
+          checkDate: form.checkDate,
+          doorWindowScore: form.doorWindowScore || 0,
+          itemPlacementScore: form.itemPlacementScore || 0,
+          beddingScore: form.beddingScore || 0,
+          cleanlinessScore: form.cleanlinessScore || 0,
+          overallScore: form.overallScore || 0,
+          checker: form.checker,
+          remarks: form.remarks || ''
+        }
+        
         const url = isEdit.value ? '/hygiene/update' : '/hygiene/add'
         const method = isEdit.value ? 'put' : 'post'
         
-        const response = await request[method](url, form)
+        const response = await request[method](url, submitData)
         if (response.code === '0') {
           ElMessage.success(isEdit.value ? '更新成功' : '添加成功')
           showAddDialog.value = false
@@ -288,6 +323,7 @@ export default {
           ElMessage.error(response.msg || '操作失败')
         }
       } catch (error) {
+        console.error('提交失败:', error)
         ElMessage.error('表单验证失败')
       }
     }
@@ -308,6 +344,10 @@ export default {
         remarks: ''
       })
       isEdit.value = false
+      // 清除表单验证状态
+      if (formRef.value) {
+        formRef.value.clearValidate()
+      }
     }
 
     // 获取等级标签类型
@@ -340,6 +380,7 @@ export default {
       handleSearch,
       handleSizeChange,
       handleCurrentChange,
+      handleAdd,
       handleEdit,
       handleDelete,
       handleSubmit,

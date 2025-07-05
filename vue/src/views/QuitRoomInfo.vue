@@ -28,7 +28,8 @@
           <el-table-column label="姓名" prop="name" width="100px"/>
           <el-table-column label="宿舍号" prop="dormRoomId" sortable>
             <template #default="scope">
-              {{ scope.row.dormRoomId ? scope.row.dormRoomId.toString().slice(-3) : '' }}
+              <span v-if="currentIdentity === 'admin'">{{ scope.row.dormRoomId || '' }}</span>
+              <span v-else>{{ scope.row.dormRoomId ? scope.row.dormRoomId.toString().slice(-3) : '' }}</span>
             </template>
           </el-table-column>
           <el-table-column label="床位号" prop="bedNumber" sortable/>
@@ -91,8 +92,11 @@
                   <span>{{ form.name }}</span>
                 </template>
               </el-form-item>
-              <el-form-item label="宿舍号：" prop="inputRoom">
-                <el-input v-model="form.inputRoom" maxlength="3" placeholder="如101, 305" />
+              <el-form-item label="宿舍号：" prop="dormRoomId">
+                <template #default="scope">
+                  <span v-if="currentIdentity === 'admin'">{{ form.dormRoomId }}</span>
+                  <span v-else>{{ form.dormRoomId ? form.dormRoomId.toString().slice(-3) : '' }}</span>
+                </template>
               </el-form-item>
               <el-form-item label="床位号：" prop="bedNumber">
                 <template #default="scope">
