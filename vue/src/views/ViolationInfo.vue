@@ -2,7 +2,7 @@
   <div class="violation-container">
     <div class="header">
       <h2>违纪管理</h2>
-      <el-button type="primary" @click="showAddDialog = true; isEdit = false; resetForm();">
+      <el-button type="primary" @click="handleAdd">
         <el-icon><Plus /></el-icon>
         新增违纪记录
       </el-button>
@@ -29,7 +29,7 @@
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
       <el-table-column label="房间号">
         <template #default="scope">
-          {{ scope.row.dormroomId ? scope.row.dormroomId.toString().slice(-3) : '' }}
+          {{ scope.row.dormroomId || '' }}
         </template>
       </el-table-column>
       <el-table-column prop="studentName" label="学生姓名" width="100" />
@@ -111,7 +111,7 @@
             type="datetime"
             placeholder="选择违纪时间"
             style="width: 100%"
-            value-format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DDTHH:mm:ss"
           />
         </el-form-item>
         <el-form-item label="扣分" prop="penaltyScore">
@@ -124,7 +124,7 @@
           />
         </el-form-item>
         <el-form-item label="上报人员" prop="reporter">
-          <el-input v-model="form.reporter" readonly placeholder="自动带出" />
+          <el-input v-model="form.reporter" readonly placeholder="自动带出当前用户" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -156,11 +156,11 @@ export default {
     const showAddDialog = ref(false)
     const isEdit = ref(false)
     const formRef = ref(null)
-    const user = ref(JSON.parse(sessionStorage.getItem('user') || '{}'))
+    const user = ref(JSON.parse(sessionStorage.getItem('access-user') || '{}'))
 
     const form = reactive({
       id: null,
-      dormroomId: '',
+      inputRoom: '',
       dormbuildId: '',
       studentUsername: '',
       studentName: '',
@@ -168,11 +168,18 @@ export default {
       violationDescription: '',
       violationDate: '',
       penaltyScore: 0,
-      reporter: user.value.name // 自动赋值
+      reporter: '管理员' // 设置默认值
     })
 
     const rules = {
-      dormroomId: [{ required: true, message: '请输入房间号', trigger: 'blur' }],
+      inputRoom: [
+        { required: true, message: '请输入房间号', trigger: 'blur' },
+        { pattern: /^\d{3}$/, message: '房间号必须是3位数字', trigger: 'blur' }
+      ],
+      dormbuildId: [
+        { required: true, message: '请输入宿舍楼号', trigger: 'blur' },
+        { pattern: /^\d+$/, message: '宿舍楼号必须是数字', trigger: 'blur' }
+      ],
       studentUsername: [{ required: true, message: '请输入学生学号', trigger: 'blur' }],
       studentName: [{ required: true, message: '请输入学生姓名', trigger: 'blur' }],
       violationType: [{ required: true, message: '请选择违纪类型', trigger: 'change' }],
@@ -198,7 +205,8 @@ export default {
           ElMessage.error(res.msg || '获取数据失败')
         }
       } catch (error) {
-        ElMessage.error('请求失败')
+        console.error('获取数据失败:', error)
+        ElMessage.error('获取数据失败')
       } finally {
         loading.value = false
       }
@@ -223,9 +231,11 @@ export default {
       if (formRef.value) {
         formRef.value.resetFields()
       }
+      // 正确获取用户信息
+      const currentUser = JSON.parse(sessionStorage.getItem('access-user') || '{}')
       Object.assign(form, {
         id: null,
-        dormroomId: '',
+        inputRoom: '',
         dormbuildId: '',
         studentUsername: '',
         studentName: '',
@@ -233,13 +243,19 @@ export default {
         violationDescription: '',
         violationDate: '',
         penaltyScore: 0,
-        reporter: user.value.name // 自动赋值
+        reporter: currentUser.name || currentUser.username || '管理员'
       })
+      isEdit.value = false
     }
 
     const handleEdit = (row) => {
       isEdit.value = true
-      Object.assign(form, row)
+      // 将后端字段转换为前端字段
+      const editData = {
+        ...row,
+        inputRoom: row.dormroomId ? row.dormroomId.toString().slice(-3) : ''
+      }
+      Object.assign(form, editData)
       showAddDialog.value = true
     }
 
@@ -249,12 +265,17 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
-        const res = await request.delete(`/violation/delete/${row.id}`)
-        if (res.code === '0') {
-          ElMessage.success('删除成功')
-          fetchData()
-        } else {
-          ElMessage.error(res.msg || '删除失败')
+        try {
+          const res = await request.delete(`/violation/delete/${row.id}`)
+          if (res.code === '0') {
+            ElMessage.success('删除成功')
+            fetchData()
+          } else {
+            ElMessage.error(res.msg || '删除失败')
+          }
+        } catch (error) {
+          console.error('删除失败:', error)
+          ElMessage.error('删除失败')
         }
       }).catch(() => {})
     }
@@ -266,36 +287,75 @@ export default {
         inputPattern: /.+/,
         inputErrorMessage: '处理结果不能为空'
       }).then(async ({ value }) => {
-        const res = await request.put('/violation/process', {
-          id: row.id,
-          handleResult: value,
-          handler: user.value.name
-        })
-        if (res.code === '0') {
-          ElMessage.success('处理成功')
-          fetchData()
-        } else {
-          ElMessage.error(res.msg || '处理失败')
+        try {
+          // 正确获取用户信息
+          const currentUser = JSON.parse(sessionStorage.getItem('access-user') || '{}')
+          const handler = currentUser.name || currentUser.username || '管理员'
+          
+          const res = await request.put('/violation/process', {
+            id: row.id,
+            handleResult: value,
+            handler: handler
+          })
+          if (res.code === '0') {
+            ElMessage.success('处理成功')
+            fetchData()
+          } else {
+            ElMessage.error(res.msg || '处理失败')
+          }
+        } catch (error) {
+          console.error('处理失败:', error)
+          ElMessage.error('处理失败')
         }
       }).catch(() => {})
     }
 
     const handleSubmit = async () => {
       if (!formRef.value) return
-      await formRef.value.validate(async (valid) => {
-        if (valid) {
-          const url = isEdit.value ? '/violation/update' : '/violation/add'
-          const method = isEdit.value ? 'put' : 'post'
-          const res = await request[method](url, form)
-          if (res.code === '0') {
-            ElMessage.success(isEdit.value ? '更新成功' : '新增成功')
-            showAddDialog.value = false
-            fetchData()
-          } else {
-            ElMessage.error(res.msg || '操作失败')
-          }
+      try {
+        console.log('提交前的表单数据:', form)
+        console.log('reporter字段值:', form.reporter, '类型:', typeof form.reporter)
+        await formRef.value.validate()
+        
+        // 构建提交给后端的数据
+        const submitData = {
+          id: form.id,
+          dormroomId: parseInt(form.dormbuildId + form.inputRoom), // 组合楼栋号和房间号
+          dormbuildId: parseInt(form.dormbuildId),
+          studentUsername: form.studentUsername,
+          studentName: form.studentName,
+          violationType: form.violationType,
+          violationDescription: form.violationDescription,
+          violationDate: form.violationDate,
+          penaltyScore: form.penaltyScore || 0,
+          reporter: form.reporter || '管理员'
         }
-      })
+        
+        console.log('提交给后端的数据:', submitData)
+        
+        const url = isEdit.value ? '/violation/update' : '/violation/add'
+        const method = isEdit.value ? 'put' : 'post'
+        const res = await request[method](url, submitData)
+        if (res.code === '0') {
+          ElMessage.success(isEdit.value ? '更新成功' : '新增成功')
+          showAddDialog.value = false
+          resetForm()
+          fetchData()
+        } else {
+          ElMessage.error(res.msg || '操作失败')
+        }
+      } catch (error) {
+        console.error('提交失败:', error)
+        console.error('表单验证失败详情:', error.message)
+        console.error('表单数据:', form)
+        ElMessage.error('表单验证失败: ' + error.message)
+      }
+    }
+
+    const handleAdd = () => {
+      isEdit.value = false
+      resetForm()
+      showAddDialog.value = true
     }
 
     const getStatusType = (status) => {
@@ -309,7 +369,11 @@ export default {
 
     onMounted(() => {
       fetchData()
-      form.reporter = user.value.name
+      // 正确获取用户信息
+      const currentUser = JSON.parse(sessionStorage.getItem('access-user') || '{}')
+      console.log('当前用户信息:', currentUser)
+      form.reporter = currentUser.name || currentUser.username || '管理员'
+      console.log('设置的上报人员:', form.reporter)
     })
 
     return {
@@ -332,7 +396,8 @@ export default {
       handleProcess,
       handleSubmit,
       resetForm,
-      getStatusType
+      getStatusType,
+      handleAdd
     }
   }
 }

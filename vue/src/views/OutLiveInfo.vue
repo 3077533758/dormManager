@@ -51,6 +51,13 @@
           </el-table-column>
           <el-table-column label="申请时间" prop="applyTime" sortable/>
           <el-table-column label="处理时间" prop="finishTime" sortable/>
+          <!-- 假设有宿舍号字段 -->
+          <el-table-column v-if="tableData.length && tableData[0].dormRoomId !== undefined" label="宿舍号" prop="dormRoomId" sortable>
+            <template #default="scope">
+              <span v-if="currentIdentity === 'admin'">{{ scope.row.dormRoomId || '' }}</span>
+              <span v-else>{{ scope.row.dormRoomId ? scope.row.dormRoomId.toString().slice(-3) : '' }}</span>
+            </template>
+          </el-table-column>
           <!--      操作栏-->
           <el-table-column label="操作" width="200px">
             <template #default="scope">
@@ -115,6 +122,12 @@
               <el-form-item label="处理时间：" prop="finishTime">
                 <template #default="scope">
                   <span>{{ form.finishTime || '暂无' }}</span>
+                </template>
+              </el-form-item>
+              <el-form-item v-if="form.dormRoomId !== undefined" label="宿舍号：" prop="dormRoomId">
+                <template #default="scope">
+                  <span v-if="currentIdentity === 'admin'">{{ form.dormRoomId }}</span>
+                  <span v-else>{{ form.dormRoomId ? form.dormRoomId.toString().slice(-3) : '' }}</span>
                 </template>
               </el-form-item>
             </el-form>

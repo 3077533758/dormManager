@@ -26,12 +26,14 @@ public class ViolationRecordController {
 
     @PostMapping("/add")
     public Result<?> add(@RequestBody ViolationRecord violationRecord) {
+        System.out.println("接收到的违纪记录数据: " + violationRecord);
         int result = violationRecordService.addViolationRecord(violationRecord);
         return result > 0 ? Result.success() : Result.error("-1", "添加失败");
     }
 
     @PutMapping("/update")
     public Result<?> update(@RequestBody ViolationRecord violationRecord) {
+        System.out.println("接收到的更新违纪记录数据: " + violationRecord);
         int result = violationRecordService.updateViolationRecord(violationRecord);
         return result > 0 ? Result.success() : Result.error("-1", "更新失败");
     }

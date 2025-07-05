@@ -29,7 +29,7 @@
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
       <el-table-column label="房间号">
         <template #default="scope">
-          {{ scope.row.dormroomId ? scope.row.dormroomId.toString().slice(-3) : '' }}
+          {{ scope.row.dormroomId || '' }}
         </template>
       </el-table-column>
       <el-table-column prop="evaluationPeriod" label="评比周期" width="150" />
@@ -83,6 +83,9 @@
         <el-form-item label="房间号" prop="inputRoom">
           <el-input v-model="form.inputRoom" maxlength="3" placeholder="如101, 305" />
         </el-form-item>
+        <el-form-item label="宿舍楼号" prop="dormbuildId">
+          <el-input v-model="form.dormbuildId" placeholder="如1, 2, 3" />
+        </el-form-item>
         <el-form-item label="评比周期" prop="evaluationPeriod">
           <el-input v-model="form.evaluationPeriod" placeholder="例如: 2024年第一学期" />
         </el-form-item>
@@ -130,6 +133,7 @@ export default {
     const form = reactive({
       id: null,
       inputRoom: '',
+      dormbuildId: '',
       evaluationPeriod: '',
       hygieneScore: 0,
       gpaScore: 0,
@@ -137,7 +141,14 @@ export default {
     })
 
     const rules = {
-      inputRoom: [{ required: true, message: '请输入房间号', trigger: 'blur' }],
+      inputRoom: [
+        { required: true, message: '请输入房间号', trigger: 'blur' },
+        { pattern: /^\d{3}$/, message: '房间号必须是3位数字', trigger: 'blur' }
+      ],
+      dormbuildId: [
+        { required: true, message: '请输入宿舍楼号', trigger: 'blur' },
+        { pattern: /^\d+$/, message: '宿舍楼号必须是数字', trigger: 'blur' }
+      ],
       evaluationPeriod: [{ required: true, message: '请输入评比周期', trigger: 'blur' }]
     }
 
@@ -195,6 +206,7 @@ export default {
       Object.assign(form, {
         id: null,
         inputRoom: '',
+        dormbuildId: '',
         evaluationPeriod: '',
         hygieneScore: 0,
         gpaScore: 0,
@@ -204,7 +216,13 @@ export default {
 
     const handleEdit = (row) => {
       isEdit.value = true
-      Object.assign(form, row)
+      // 拆分房间号
+      const editData = {
+        ...row,
+        inputRoom: row.dormroomId ? row.dormroomId.toString().slice(-3) : '',
+        dormbuildId: row.dormbuildId ? row.dormbuildId.toString() : ''
+      }
+      Object.assign(form, editData)
       showAddDialog.value = true
     }
 
@@ -247,9 +265,19 @@ export default {
       if (!formRef.value) return
       await formRef.value.validate(async (valid) => {
         if (valid) {
+          // 组装提交数据
+          const submitData = {
+            id: form.id,
+            dormroomId: parseInt(form.dormbuildId + form.inputRoom),
+            dormbuildId: parseInt(form.dormbuildId),
+            evaluationPeriod: form.evaluationPeriod,
+            hygieneScore: Number(form.hygieneScore),
+            gpaScore: Number(form.gpaScore),
+            remarks: form.remarks
+          }
           const url = isEdit.value ? '/evaluation/update' : '/evaluation/add'
           const method = isEdit.value ? 'put' : 'post'
-          const res = await request[method](url, form)
+          const res = await request[method](url, submitData)
           if (res.code === '0') {
             ElMessage.success(isEdit.value ? '更新成功' : '新增成功')
             showAddDialog.value = false

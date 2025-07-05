@@ -20,9 +20,13 @@ public class ViolationRecordServiceImpl implements ViolationRecordService {
     public Page<ViolationRecord> findPage(Integer pageNum, Integer pageSize, String search) {
         QueryWrapper<ViolationRecord> queryWrapper = new QueryWrapper<>();
         if (search != null && !search.isEmpty()) {
-            queryWrapper.like("student_name", search)
-                    .or().like("dormroom_id", search)
-                    .or().like("violation_type", search);
+            // 支持按学生姓名、房间号、违纪类型、状态搜索
+            queryWrapper.and(wrapper -> wrapper
+                .like("student_name", search)
+                .or().like("dormroom_id", search)
+                .or().like("violation_type", search)
+                .or().like("status", search)
+            );
         }
         queryWrapper.orderByDesc("violation_date");
         return violationRecordMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
